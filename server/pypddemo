@@ -1,0 +1,4 @@
+PYTHONPATH="${PYTHONPATH}:../stdpycompat:../doop:../models"
+export PYTHONPATH
+python -B pypddemo.py
+
