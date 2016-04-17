@@ -296,42 +296,21 @@ class DocumentCollection(object):
        
     def AddEdges(self, edges):
         #A set of edges is received over the internet add them and replay the objects
+        changes = dict()
 
         for edge in edges:
             (documentid, documentclassname, edgeclassname, edgeid, startnode1id, startnode2id, endnodeid, propertyownerid, propertyname, propertyvaluestr, propertytypestr) = edge
-
-            if documentid in historygraphdict:
-                historygraph = historygraphdict[documentid]
-            else:
-                historygraph = HistoryGraph()
-                historygraphdict[documentid] = historygraph
-                documentclassnamedict[documentid] = documentclassname
-            if propertytypestr == "int":
-                propertytype = int
-                propertyvalue = int(propertyvaluestr)
-            elif propertytypestr == "basestring":
-                propertytype = basestring
-                propertyvalue = str(propertyvaluestr)
-            elif propertytypestr == "" and edgeclassname == "HistoryEdgeNull":
-                propertytype = None
-                propertyvalue = ""
-            else:
-                propertytype = self.classes[propertytypestr]
-                propertyvalue = propertyvaluestr
-            documentclassnamedict[documentid] = documentclassname
-            if startnode2id == "":
-                startnodes = {startnode1id}
-            else:
-                startnodes = {startnode1id, startnode2id}
+            if documentid not in self.objects[documentclassname]:
+                doc = self.classes[documentclassname](documentid)
+                self.AddDocumentObject(doc)
             edge = self.historyedgeclasses[edgeclassname](edgeid, startnodes, endnodeid, propertyownerid, propertyname, propertyvalue, propertytype)
-            history = historygraphdict[documentid]
-            history.AddEdge(edge)
+            self.objects[documentclassname][documentid].history.AddEdge(edge)
+            changes[documentid] = documentclassname
 
-        for documentid in historygraphdict:
-            doc = self.classes[documentclassnamedict[documentid]](documentid)
-            history.Replay(doc)
-            self.AddDocumentObject(doc)
-            
+        for documentid, documentclassname in changes.iteritems():
+            doc = self.objects[documentclassname][documentid]
+            doc.history.Replay(doc)
+
        
     def GetByClass(self, theclass):
         #print "Getting object of class " + theclass.__name__
