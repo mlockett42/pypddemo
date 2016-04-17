@@ -67,3 +67,6 @@ target/
 #pyjs compiled output
 clientside/output
 
+#Dont put the created database into git
+*.db
+

@@ -1,6 +1,5 @@
 #This module handles storing all documents in the database (and reloading)
 from collections import defaultdict
-import sqlite3
 from Document import Document
 from HistoryEdgeSimpleProperty import HistoryEdgeSimpleProperty
 from HistoryEdgeAddChild import HistoryEdgeAddChild
@@ -10,8 +9,7 @@ from HistoryEdge import HistoryEdge
 from DocumentObject import DocumentObject
 from FieldList import FieldList
 from HistoryGraph import HistoryGraph
-import os
-from json import JSONEncoder, JSONDecoder
+from jsoncompat import JSONEncoder, JSONDecoder
 from FieldInt import FieldInt
 
 class DocumentCollection(object):
@@ -39,24 +37,24 @@ class DocumentCollection(object):
             documentlist = self.objects[documentid]
             for document in documentlist:
                 history = document.history
-                    edge = history.edges[edgeid]
-                    startnodes = list(edge.startnodes)
-                    if len(edge.startnodes) == 1:
-                        startnode1id = startnodes[0]
-                        startnode2id = ""
-                    elif len(edge.startnodes) == 2:
-                        startnode1id = startnodes[0]
-                        startnode2id = startnodes[1]
-                    else:
-                        assert False
-                    
-                    if edge.propertytype is None:
-                        propertytypename = ""
-                    else:
-                        propertytypename = edge.propertytype.__name__
-                    c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
-                        "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
-                        "'" + propertytypename + "')")
+                edge = history.edges[edgeid]
+                startnodes = list(edge.startnodes)
+                if len(edge.startnodes) == 1:
+                    startnode1id = startnodes[0]
+                    startnode2id = ""
+                elif len(edge.startnodes) == 2:
+                    startnode1id = startnodes[0]
+                    startnode2id = startnodes[1]
+                else:
+                    assert False
+                
+                if edge.propertytype is None:
+                    propertytypename = ""
+                else:
+                    propertytypename = edge.propertytype.__name__
+                c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
+                    "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
+                    "'" + propertytypename + "')")
 
         c.commit()
         c.close()

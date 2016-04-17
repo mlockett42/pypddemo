@@ -3,6 +3,9 @@
 
 import sqlite3
 import os
+from collections import defaultdict
+from HistoryEdge import HistoryEdge
+from HistoryGraph import HistoryGraph
 
 def SaveDocumentCollection(dc, filenameedges, filenamedata):
     try:
@@ -19,24 +22,24 @@ def SaveDocumentCollection(dc, filenameedges, filenamedata):
         documentlist = dc.objects[documentid]
         for document in documentlist:
             history = document.history
-                edge = history.edges[edgeid]
-                startnodes = list(edge.startnodes)
-                if len(edge.startnodes) == 1:
-                    startnode1id = startnodes[0]
-                    startnode2id = ""
-                elif len(edge.startnodes) == 2:
-                    startnode1id = startnodes[0]
-                    startnode2id = startnodes[1]
-                else:
-                    assert False
-                
-                if edge.propertytype is None:
-                    propertytypename = ""
-                else:
-                    propertytypename = edge.propertytype.__name__
-                c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
-                    "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
-                    "'" + propertytypename + "')")
+            edge = history.edges[edgeid]
+            startnodes = list(edge.startnodes)
+            if len(edge.startnodes) == 1:
+                startnode1id = startnodes[0]
+                startnode2id = ""
+            elif len(edge.startnodes) == 2:
+                startnode1id = startnodes[0]
+                startnode2id = startnodes[1]
+            else:
+                assert False
+            
+            if edge.propertytype is None:
+                propertytypename = ""
+            else:
+                propertytypename = edge.propertytype.__name__
+            c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
+                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
+                "'" + propertytypename + "')")
 
     c.commit()
     c.close()
@@ -109,8 +112,13 @@ def SaveDocumentObject(database, documentobject, parentobject, foreignkeydict, c
     sql += ")"
     database.execute(sql)
     
-def LoadDocumentCollection(filenameedges, filenamedata):
-    dc = DocumentCollection()
+def LoadDocumentCollection(dc, filenameedges, filenamedata):
+    dc.objects = defaultdict(list)
+    dc.classes = dict()
+    dc.historyedgeclasses = dict()
+    for theclass in HistoryEdge.__subclasses__():
+        dc.historyedgeclasses[theclass.__name__] = theclass
+
     c = sqlite3.connect(filenameedges)
     cur = c.cursor()    
     cur.execute('''CREATE TABLE IF NOT EXISTS edge

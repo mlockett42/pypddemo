@@ -1,6 +1,6 @@
 #A DOOP history graph
 from collections import defaultdict
-import uuid
+import uuidcompat
 from HistoryEdgeNull import HistoryEdgeNull
 
 class HistoryGraph(object):
@@ -74,8 +74,8 @@ class HistoryGraph(object):
                 presentnodes.add(edge.endnode)
         if len(presentnodes) > 1:
             assert len(presentnodes) == 2
-            nextnode = str(uuid.uuid4())
-            nulledge = HistoryEdgeNull(str(uuid.uuid4()), presentnodes, nextnode, "", "", "", None)
+            nextnode = uuidcompat.getuuid()
+            nulledge = HistoryEdgeNull(uuidcompat.getuuid(), presentnodes, nextnode, "", "", "", None)
             self.AddEdge(nulledge)
 
     def ProcessConflictWinners(self):

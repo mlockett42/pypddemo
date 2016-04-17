@@ -1,9 +1,8 @@
 from Document import Document
 from DocumentObject import DocumentObject
-
-class Drawing(Document):
-    triangles = FieldList(Triangle)
-    name = FieldText()
+from FieldList import FieldList
+from FieldText import FieldText
+from FieldInt import FieldInt
 
 class Triangle(DocumentObject):
     x1 = FieldInt()
@@ -12,4 +11,9 @@ class Triangle(DocumentObject):
     y2 = FieldInt()
     x3 = FieldInt()
     y3 = FieldInt()
+
+class Drawing(Document):
+    triangles = FieldList(Triangle)
+    name = FieldText()
+
 

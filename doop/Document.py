@@ -1,6 +1,6 @@
 #A DOOP document
 from DocumentObject import DocumentObject
-import uuid
+import uuidcompat
 from HistoryGraph import HistoryGraph
 from ChangeType import ChangeType
 from HistoryEdgeSimpleProperty import HistoryEdgeSimpleProperty
@@ -41,15 +41,15 @@ class Document(DocumentObject):
         self.insetattr = False
         
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
-        nextnode  = str(uuid.uuid4())
+        nextnode  = uuidcompat.getuuid()
         nodeset = set()
         nodeset.add(self.currentnode)
         if changetype == ChangeType.SET_PROPERTY_VALUE:
-            edge = HistoryEdgeSimpleProperty(str(uuid.uuid4()), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
+            edge = HistoryEdgeSimpleProperty(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
         elif changetype == ChangeType.ADD_CHILD:
-            edge = HistoryEdgeAddChild(str(uuid.uuid4()), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
+            edge = HistoryEdgeAddChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
         elif changetype == ChangeType.REMOVE_CHILD:
-            edge = HistoryEdgeRemoveChild(str(uuid.uuid4()), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
+            edge = HistoryEdgeRemoveChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
         else:
             assert False
         self.currentnode = nextnode

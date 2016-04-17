@@ -1,5 +1,5 @@
 #A DOOP Document Object
-import uuid
+import uuidcompat
 from Field import Field
 from ChangeType import *
 from FieldList import FieldList
@@ -21,7 +21,7 @@ class DocumentObject(object):
         self.doop_field = dict()
         self.parent = None
         if id is None:
-            id = str(uuid.uuid4())
+            id = uuidcompat.getuuid()
         self.id = id
         variables = [a for a in dir(self.__class__) if not a.startswith('__') and not callable(getattr(self.__class__,a))]
         for k in variables:

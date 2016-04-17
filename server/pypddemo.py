@@ -11,6 +11,9 @@ import datetime
 from collections import defaultdict
 import base64
 from twisted.internet.defer import Deferred
+import DocumentCollection
+import model
+import DocumentCollectionHelper
 
 #The main documentcollection
 dc = None
@@ -83,18 +86,15 @@ class UploadEdges(Resource):
 
 def StartApplication(resource):
     #load the schema
-    DocumentCollection.Register(model.Drawing)
-    DocumentCollection.Register(model.Triangle)
-    global dc
-    dc = LoadDocumentCollection.Load('drawing.history.db', 'drawing.content.db')
-
-    globalvars.uuidfn = lambda x: str(uuid.uuid4())
+    DocumentCollection.InitialiseDocumentCollection()
+    DocumentCollection.documentcollection.Register(model.Drawing)
+    DocumentCollection.documentcollection.Register(model.Triangle)
+    DocumentCollectionHelper.LoadDocumentCollection(DocumentCollection.documentcollection, 'drawing.history.db', 'drawing.content.db')
 
     resource.addChildResources()
     
     factory = PYPDDemoSite(resource)
-    reactor.listenTCP(resource.GetPort(), factory)
-    reactor.callLater(1, Tickle)
+    reactor.listenTCP(8080, factory)
     reactor.run()
 
 StartApplication(PYPDDemo())
