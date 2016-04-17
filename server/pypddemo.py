@@ -15,13 +15,13 @@ from twisted.internet.defer import Deferred
 #The main documentcollection
 dc = None
 
-class DeliveryEngineSite(Site):
+class PYPDDemoSite(Site):
     def getResourceFor(self, request):
-        request.setHeader('server',  'DeliveryEngine/1.0')
+        request.setHeader('server',  'PYPDDemo/1.0')
         request.setHeader('cache-control: ',  'cache-control: private, max-age=0, no-cache')
         return Site.getResourceFor(self, request)
 
-class DeliveryEngine(Resource):
+class PYPDDemo(Resource):
     #The root resource
     isLeaf = False
     def getChild(self, name, request):
@@ -30,10 +30,19 @@ class DeliveryEngine(Resource):
             return self
         return Resource.getChild(self, name, request)
 
-    def addChildResources2(self):
+    def addChildResources(self):
         self.putChild("StaticObjects", GetStaticObjects())
         self.putChild("GetUUIDs", GetUUIDsCommand())
         self.putChild("UploadEdges", UploadEdges())
+        self.putChild("debug", File("../website/output"))
+    def render_GET(self, request):
+        return """
+<script type="text/javascript">
+<!--
+window.location = "/debug/pypddemo.html"
+//-->
+</script>
+"""
 
 class GetUUIDsCommand(Resource):
     isLeaf = True
@@ -83,10 +92,10 @@ def StartApplication(resource):
 
     resource.addChildResources()
     
-    factory = DeliveryEngineSite(resource)
+    factory = PYPDDemoSite(resource)
     reactor.listenTCP(resource.GetPort(), factory)
     reactor.callLater(1, Tickle)
     reactor.run()
 
-StartApplication(DeliveryEngine())
+StartApplication(PYPDDemo())
 

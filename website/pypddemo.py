@@ -18,47 +18,17 @@ from pyjamas.Timer import Timer
 from pyjamas.HTTPRequest import HTTPRequest
 from DocumentCollection import DocumentCollection
 
-class OscarPOS:
+class PYPDDemo:
     def onModuleLoad(self):
-
         self.mainpanel = MainPanel(self)
-
-	    RootPanel().add(self.mainpanel)
-	    objfactory.InitialiseObjFactory()
+        RootPanel().add(self.mainpanel)
 	
 
 class MainPanel(VerticalPanel):
     def __init__(self, owner):
         super(VerticalPanel, self).__init__()
         self.owner = owner
-	vpanel = VerticalPanel()
-	vpanel.add(Label("Hello world"))
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self.add(Label("Hello world"))
 
 
 
