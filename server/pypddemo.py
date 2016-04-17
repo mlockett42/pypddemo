@@ -34,7 +34,7 @@ class PYPDDemo(Resource):
         self.putChild("StaticObjects", GetStaticObjects())
         self.putChild("GetUUIDs", GetUUIDsCommand())
         self.putChild("UploadEdges", UploadEdges())
-        self.putChild("debug", File("../website/output"))
+        self.putChild("debug", File("../clientside/output"))
     def render_GET(self, request):
         return """
 <script type="text/javascript">
