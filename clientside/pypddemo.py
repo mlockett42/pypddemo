@@ -17,19 +17,50 @@ import pygwt
 from pyjamas.Timer import Timer
 from pyjamas.HTTPRequest import HTTPRequest
 from DocumentCollection import DocumentCollection
+from pyjamas.Canvas.GWTCanvas import GWTCanvas
+from pyjamas.Canvas import Color
 
 class PYPDDemo:
     def onModuleLoad(self):
         self.mainpanel = MainPanel(self)
         RootPanel().add(self.mainpanel)
-	
+    
 
 class MainPanel(VerticalPanel):
+    CANVAS_WIDTH = 3000
+    CANVAS_HEIGHT = 3000
     def __init__(self, owner):
         super(VerticalPanel, self).__init__()
         self.owner = owner
-        self.add(Label("Hello world"))
+        hpanel = HorizontalPanel()
+        self.add(hpanel)
+        vpanelMenu = VerticalPanel()
+        hpanel.add(vpanelMenu)
+        self.addbutton = Button("Add Triangle")
+        vpanelMenu.add(self.addbutton)
+        self.addbutton.addClickListener(getattr(self, "addtriangle"))
+        self.canvas = GWTCanvas(self.CANVAS_WIDTH, self.CANVAS_HEIGHT)
+        vpanelCanvas = VerticalPanel()
+        vpanelCanvas.setWidth(600)
+        hpanel.add(vpanelCanvas)
+        vpanelCanvas.add(self.canvas)
+        self.canvas.addMouseListener(self)
+        self.selecteditem = None
+        self.mouseisdown = False
+        self.canvas.setFillStyle(Color.RED)
+        self.canvas.fillRect(0, 0, self.CANVAS_WIDTH-1, self.CANVAS_HEIGHT-1)
 
+    def addtriangle(self, sender):
+        pass
+
+    def onMouseDown(self, sender, x, y):
+        pass
+
+    def onMouseMove(self, sender, x, y):
+        pass
+
+    def onMouseUp(self, sender,x, y):
+        pass
 
 
 if __name__ == '__main__':
