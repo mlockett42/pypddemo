@@ -2,9 +2,9 @@
 
 class defaultdict(dict):
     def __init__(self, default_factory=None, *a, **kw):
-        if (default_factory is not None and
-            not hasattr(default_factory, '__call__')):
-            raise TypeError('first argument must be callable')
+        #if (default_factory is not None and
+        #    not hasattr(default_factory, '__call__')):
+        #    raise TypeError('first argument must be callable')
         dict.__init__(self, *a, **kw)
         self.default_factory = default_factory
     def __getitem__(self, key):

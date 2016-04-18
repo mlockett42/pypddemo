@@ -11,9 +11,9 @@ class Triangle(DocumentObject):
     y2 = FieldInt()
     x3 = FieldInt()
     y3 = FieldInt()
+    z_order = FieldInt()
 
 class Drawing(Document):
     triangles = FieldList(Triangle)
-    name = FieldText()
 
 

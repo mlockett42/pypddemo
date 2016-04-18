@@ -20,8 +20,9 @@ class DocumentObject(object):
         self.insetattr = True
         self.doop_field = dict()
         self.parent = None
-        if id is None:
-            id = uuidcompat.getuuid()
+        #if id is None:
+        #    id = uuidcompat.getuuid()
+        id = uuidcompat.getuuid()
         self.id = id
         variables = [a for a in dir(self.__class__) if not a.startswith('__') and not callable(getattr(self.__class__,a))]
         for k in variables:
