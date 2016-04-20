@@ -53,6 +53,10 @@ def PointInTriangle (pt, triangle):
 
     return ((b1 == b2) and (b2 == b3));
 
+def HandleSelected(x1,y1,x2,y2):
+    #Return True if the handle was selected
+    return (x2 - x1)**2 + (y2 - y1)**2 <= 5**2
+
 class MainPanel(VerticalPanel):
     CANVAS_WIDTH = 900
     CANVAS_HEIGHT = 700
@@ -78,6 +82,7 @@ class MainPanel(VerticalPanel):
         vpanelCanvas.add(self.canvas)
         self.canvas.addMouseListener(self)
         self.selecteditem = None
+        self.selectedhandle = None
         self.mouseisdown = False
         dc = DocumentCollection.documentcollection
         if len(dc.objects[model.Drawing.__class__.__name__]) == 0:
@@ -152,23 +157,43 @@ class MainPanel(VerticalPanel):
     
 
     def onMouseDown(self, sender, x, y):
-        self.selecteditem = self.FindTriangle(x,y)
-        self.Draw()
         self.mouseisdown = True
+        if self.selecteditem is not None:
+            self.selectedhandle = None
+            if HandleSelected(x,y, self.selecteditem.x1, self.selecteditem.y1):
+                self.selectedhandle = 1
+            elif HandleSelected(x,y, self.selecteditem.x2, self.selecteditem.y2):
+                self.selectedhandle = 2
+            elif HandleSelected(x,y, self.selecteditem.x3, self.selecteditem.y3):
+                self.selectedhandle = 3
+        self.selecteditem = self.FindTriangle(x,y)
+        if self.selecteditem is None:
+            self.selectedhandle = None
+        self.Draw()
         self.lastx = x
         self.lasty = y
 
     def onMouseMove(self, sender, x, y):
-        if self.mouseisdown:
+        if self.selecteditem is not None and self.mouseisdown:
             diffx = x - self.lastx
             diffy = y - self.lasty
             t = self.selecteditem
-            t.x1 = t.x1 + diffx
-            t.y1 = t.y1 + diffy
-            t.x2 = t.x2 + diffx
-            t.y2 = t.y2 + diffy
-            t.x3 = t.x3 + diffx
-            t.y3 = t.y3 + diffy
+            if self.selectedhandle is None:
+                t.x1 = t.x1 + diffx
+                t.y1 = t.y1 + diffy
+                t.x2 = t.x2 + diffx
+                t.y2 = t.y2 + diffy
+                t.x3 = t.x3 + diffx
+                t.y3 = t.y3 + diffy
+            elif self.selectedhandle == 1:
+                t.x1 = t.x1 + diffx
+                t.y1 = t.y1 + diffy
+            elif self.selectedhandle == 2:
+                t.x2 = t.x2 + diffx
+                t.y2 = t.y2 + diffy
+            elif self.selectedhandle == 3:
+                t.x3 = t.x3 + diffx
+                t.y3 = t.y3 + diffy
             self.lastx = x
             self.lasty = y
             self.Draw()
