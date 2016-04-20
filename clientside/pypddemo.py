@@ -170,8 +170,9 @@ class MainPanel(VerticalPanel):
                 self.selectedhandle = 2
             elif HandleSelected(x,y, self.selecteditem.x3, self.selecteditem.y3):
                 self.selectedhandle = 3
-        self.selecteditem = self.FindTriangle(x,y)
-        if self.selecteditem is None:
+        if self.selectedhandle is None:
+            self.selecteditem = self.FindTriangle(x,y)
+        if self.selecteditem is None and self.selectedhandle is None:
             self.selectedhandle = None
         self.Draw()
         self.lastx = x
