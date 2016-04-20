@@ -143,16 +143,20 @@ class MainPanel(VerticalPanel):
                 self.DrawHandle(t.x3, t.y3)
 
     def addtriangle(self, sender):
-        pos = 50 + len(self.drawing.triangles) * 150
+        left_margin = 50
+        triangle_spacing = 150
+        c = len(self.drawing.triangles)
+        posx = left_margin + c % ((self.CANVAS_WIDTH - left_margin) // triangle_spacing) * triangle_spacing
+        posy = c // ((self.CANVAS_WIDTH - left_margin) // triangle_spacing) * triangle_spacing
         t = model.Triangle(None)
         self.drawing.triangles.add(t)
         t.z_order = len(self.drawing.triangles)
-        t.x1 = pos
-        t.y1 = 50
-        t.x2 = pos + 100
-        t.y2 = 100
-        t.x3 = pos + 50
-        t.y3 = 150
+        t.x1 = posx
+        t.y1 = posy + 50
+        t.x2 = posx + 100
+        t.y2 = posy + 100
+        t.x3 = posx + 50
+        t.y3 = posy + 150
         self.Draw()
     
 
