@@ -21,6 +21,7 @@ from pyjamas.Canvas.GWTCanvas import GWTCanvas
 from pyjamas.Canvas import Color
 import model
 import uuidcompat
+import math
 
 class PYPDDemo:
     def onModuleLoad(self):
@@ -31,7 +32,26 @@ class PYPDDemo:
         self.mainpanel = MainPanel(self)
         RootPanel().add(self.mainpanel)
 
-    
+class Point(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+#Determining if a point is inside a triangle copied from this stack overflow answer
+#http://stackoverflow.com/a/2049593
+def Sign (p1, p2, p3):
+    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+
+def PointInTriangle (pt, triangle):
+    v1 = Point(triangle.x1, triangle.y1)
+    v2 = Point(triangle.x2, triangle.y2)
+    v3 = Point(triangle.x3, triangle.y3)
+
+    b1 = Sign(pt, v1, v2) < 0.0;
+    b2 = Sign(pt, v2, v3) < 0.0;
+    b3 = Sign(pt, v3, v1) < 0.0;
+
+    return ((b1 == b2) and (b2 == b3));
 
 class MainPanel(VerticalPanel):
     CANVAS_WIDTH = 900
@@ -70,9 +90,8 @@ class MainPanel(VerticalPanel):
     def sortfn(self, t1, t2):
         return cmp(t1.z_order, t2.z_order)
 
-    def Draw(self):
-        self.canvas.setFillStyle(Color.WHITE)
-        self.canvas.fillRect(0, 0, self.CANVAS_WIDTH, self.CANVAS_HEIGHT)
+    def GetTrianglesAsList(self):
+        #Return the triangles as an ordinary python list
         #triangles = [self.drawing.triangles.GetDocument().documentobjects[objid] for objid in self.drawing.triangles]
         triangles = list()
         for triangle in self.drawing.triangles:
@@ -80,7 +99,18 @@ class MainPanel(VerticalPanel):
             triangles.append(triangle)
         if len(triangles) > 0:
             triangles.sort(self.sortfn)
-        for t in triangles:
+        return triangles
+
+    def DrawHandle(self,x,y):
+        self.canvas.setFillStyle(Color.RED)
+        self.canvas.beginPath()
+        self.canvas.arc(x, y, 5, 0,  math.pi * 2, False)
+        self.canvas.fill()
+
+    def Draw(self):
+        self.canvas.setFillStyle(Color.WHITE)
+        self.canvas.fillRect(0, 0, self.CANVAS_WIDTH, self.CANVAS_HEIGHT)
+        for t in self.GetTrianglesAsList():
             self.canvas.setFillStyle(Color.BLUE)
             self.canvas.setLineWidth(5)
             self.canvas.setStrokeStyle(Color.BLACK)
@@ -92,6 +122,20 @@ class MainPanel(VerticalPanel):
             self.canvas.lineTo(t.x1, t.y1)
             self.canvas.fill()
             self.canvas.stroke()
+
+            if self.selecteditem == t:
+                self.canvas.setLineWidth(1)
+                self.canvas.setStrokeStyle(Color.RED)
+                self.canvas.beginPath()
+                self.canvas.moveTo(t.x1, t.y1)
+                self.canvas.lineTo(t.x2, t.y2)
+                self.canvas.lineTo(t.x3, t.y3)
+                self.canvas.lineTo(t.x1, t.y1)
+                self.canvas.stroke()
+            
+                self.DrawHandle(t.x1, t.y1)
+                self.DrawHandle(t.x2, t.y2)
+                self.DrawHandle(t.x3, t.y3)
 
     def addtriangle(self, sender):
         pos = 50 + len(self.drawing.triangles) * 150
@@ -108,19 +152,42 @@ class MainPanel(VerticalPanel):
     
 
     def onMouseDown(self, sender, x, y):
-        pass
+        self.selecteditem = self.FindTriangle(x,y)
+        self.Draw()
+        self.mouseisdown = True
+        self.lastx = x
+        self.lasty = y
 
     def onMouseMove(self, sender, x, y):
-        pass
+        if self.mouseisdown:
+            diffx = x - self.lastx
+            diffy = y - self.lasty
+            t = self.selecteditem
+            t.x1 = t.x1 + diffx
+            t.y1 = t.y1 + diffy
+            t.x2 = t.x2 + diffx
+            t.y2 = t.y2 + diffy
+            t.x3 = t.x3 + diffx
+            t.y3 = t.y3 + diffy
+            self.lastx = x
+            self.lasty = y
+            self.Draw()
 
     def onMouseUp(self, sender,x, y):
-        pass
+        self.mouseisdown = False
 
     def onMouseEnter(self, sender, x, y):
         pass
 
     def onMouseLeave(self, sender, x, y):
         pass
+
+    def FindTriangle(self, x, y):
+        pt = Point(x, y)
+        for t in self.GetTrianglesAsList():
+            if PointInTriangle(pt, t):
+                return t
+        return None
 
 if __name__ == '__main__':
     # for pyjd, set up a web server and load the HTML from there:
