@@ -22,13 +22,24 @@ from pyjamas.Canvas import Color
 import model
 import uuidcompat
 import math
+import urllib
 
 class PYPDDemo:
+    def onError(self, text, code):
+        Window.alert("Error code = " + str(code) + " text = " + text)
+
+    def onTimeout(self, text):
+        Window.alert("Error text = " + text)
+
     def onModuleLoad(self):
         DocumentCollection.InitialiseDocumentCollection()
         DocumentCollection.documentcollection.Register(model.Drawing)
         DocumentCollection.documentcollection.Register(model.Triangle)
 
+        params = urllib.urlencode({"edgeids": [] })
+        HTTPRequest().asyncPost(url = "/StaticObjects", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
+
+    def onCompletion(self, text):
         self.mainpanel = MainPanel(self)
         RootPanel().add(self.mainpanel)
 
@@ -150,7 +161,7 @@ class MainPanel(VerticalPanel):
         posy = c // ((self.CANVAS_WIDTH - left_margin) // triangle_spacing) * triangle_spacing
         t = model.Triangle(None)
         self.drawing.triangles.add(t)
-        t.z_order = len(self.drawing.triangles)
+        t.z_order = c
         t.x1 = posx
         t.y1 = posy + 50
         t.x2 = posx + 100

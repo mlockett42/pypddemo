@@ -71,8 +71,7 @@ class GetStaticObjects(Resource):
 
     def render_POST(self, request):
         edgeids = JSONDecoder().decode(request.args["edgeids"][0])
-        global dc       
-        return dc.asJson(set(edgeids))
+        return DocumentCollection.documentcollection.asJSON(set(edgeids))
 
 class UploadEdges(Resource):
     # Get staticobjects is the 'product list'
