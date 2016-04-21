@@ -15,9 +15,6 @@ import DocumentCollection
 import model
 import DocumentCollectionHelper
 
-#The main documentcollection
-dc = None
-
 class PYPDDemoSite(Site):
     def getResourceFor(self, request):
         request.setHeader('server',  'PYPDDemo/1.0')
@@ -78,9 +75,11 @@ class UploadEdges(Resource):
     isLeaf = True
 
     def render_POST(self, request):
+        print "raw edge data = ",request.args["edges"][0]
         edges = JSONDecoder().decode(request.args["edges"][0])
-        global dc       
-        dc.AddEdges(edges)
+        #edges = JSONDecoder().decode(""" [{"a":"b"}]""")
+        #DocumentCollection.documentcollection.AddEdges(edges)
+        print "Edge received " + repr(edges)
         return "OK"
 
 def StartApplication(resource):

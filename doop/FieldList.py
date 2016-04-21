@@ -11,12 +11,13 @@ class FieldList(Field):
             self.l = set()
 
         def add(self, obj):
+            #print "obj added to FieldListImpl ", obj
             assert isinstance(obj, self.theclass)
             self.l.add(obj.id)
             assert obj.parent is None
             obj.parent = self
             self.parent.GetDocument().documentobjects[obj.id] = obj
-            self.WasChanged(ChangeType.ADD_CHILD, self.parent.id, self.name, obj.id, obj.__class__)
+            self.WasChanged(ChangeType.ADD_CHILD, self.parent.id, self.name, obj.id, obj.__class__.__name__)
 
         def remove(self, objid):
             assert isinstance(objid, basestring)
@@ -26,6 +27,7 @@ class FieldList(Field):
             self.WasChanged(ChangeType.REMOVE_CHILD, self.parent.id, self.name, objid, obj.__class__)            
 
         def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
+            #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
             assert isinstance(propertyownerid, basestring)
             self.parent.WasChanged(changetype, propertyownerid, propertyname, propertyvalue, propertytype)
 

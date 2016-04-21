@@ -41,6 +41,7 @@ class Document(DocumentObject):
         self.insetattr = False
         
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
+        #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
         nextnode  = uuidcompat.getuuid()
         nodeset = set()
         nodeset.add(self.currentnode)

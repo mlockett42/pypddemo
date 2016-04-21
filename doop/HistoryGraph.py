@@ -9,8 +9,10 @@ class HistoryGraph(object):
         self.edgesbyendnode = dict()
         self.edges = dict()
         self.isreplaying = False
+        self.edgelistener = None
 
     def AddEdge(self, edge):
+        #print "Edge added", edge, "self.edgelistener = ", self.edgelistener
         if self.isreplaying:
             return
         if edge.edgeid in self.edges:
@@ -20,6 +22,8 @@ class HistoryGraph(object):
             self.edgesbystartnode[node].append(edge)
         self.edgesbyendnode[edge.endnode] = edge
         self.edges[edge.edgeid] = edge
+        if self.edgelistener is not None:
+            self.edgelistener(edge)
 
     def Replay(self, doc):
         self.isreplaying = True
@@ -93,6 +97,11 @@ class HistoryGraph(object):
                     if not edge2.HasPastEdge(k1) and not edge1.HasPastEdge(k2):
                         edge1.CompareForConflicts(edge2)
                         
+    def GetAllEdges(self):
+        ret = list()
+        for (k, v) in self.edges.iteritems():
+            ret.append(v)
+        return ret
 
 
         

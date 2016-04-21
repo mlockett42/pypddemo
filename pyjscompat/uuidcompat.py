@@ -43,7 +43,7 @@ def getuuid():
     global uuidlist
     #print "In getUUID len(uuidlist) = " + str(len(uuidlist))
     ret = uuidlist.pop()
-    if len(uuidlist) < 50:
+    if len(uuidlist) < 500:
         GetUUIDsCommand().doCommand(sessionid)
     if len(uuidlist) == 0:
         assert False

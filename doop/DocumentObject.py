@@ -17,7 +17,9 @@ class DocumentObject(object):
         return ret
     
     def __init__(self, id):
+        #print "Debug 1"
         self.insetattr = True
+        self.changessuspended = False
         self.doop_field = dict()
         self.parent = None
         #if id is None:
@@ -31,8 +33,10 @@ class DocumentObject(object):
             if isinstance(var, Field):
                 setattr(self, k, var.CreateInstance(self, k))
         self.insetattr = False
+        #print "Debug 10 self.insetattr = ",self.insetattr
         
     def __setattr__(self, name, value):
+        #print "__setattr__ called self = ", self, " name = ", name, " value = ", value, " self.insetattr = ",self.insetattr
         super(DocumentObject, self).__setattr__(name, value)
         if name == "insetattr" or name == "parent" or name == "isreplaying" or name == "doop_field" or self.insetattr:
             return
@@ -42,6 +46,9 @@ class DocumentObject(object):
         self.insetattr = False
          
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
+        if self.changessuspended:
+            return
+        #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
         if self.parent is not None:
             assert isinstance(propertyownerid, basestring)
             self.parent.WasChanged(changetype, propertyownerid, propertyname, propertyvalue, propertytype)

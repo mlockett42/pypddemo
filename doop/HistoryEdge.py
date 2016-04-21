@@ -46,3 +46,15 @@ class HistoryEdge(object):
 	        edge2.inactive = True
         
     
+    def asDict(self):
+        return {"classname":self.__class__.__name__,
+            "edgeid":self.edgeid,
+            "startnodes":list(self.startnodes),
+            "endnode":self.endnode,
+            "propertyownerid":self.propertyownerid,
+            "propertyvalue":self.propertyvalue,
+            "propertyname":self.propertyname,
+            "propertytype":self.propertytype,
+         }
+
+

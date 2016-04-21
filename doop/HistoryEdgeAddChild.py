@@ -23,5 +23,4 @@ class HistoryEdgeAddChild(HistoryEdge):
     def GetConflictWinner(self, edge2):
         return 0 #There can never be a conflict becuase all edges are new
 
-    
-        
+            

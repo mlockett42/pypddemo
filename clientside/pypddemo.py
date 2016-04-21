@@ -23,6 +23,7 @@ import model
 import uuidcompat
 import math
 import urllib
+from jsoncompat import JSONEncoder, JSONDecoder
 
 class PYPDDemo:
     def onError(self, text, code):
@@ -30,6 +31,10 @@ class PYPDDemo:
 
     def onTimeout(self, text):
         Window.alert("Error text = " + text)
+
+    def onCompletion(self, text):
+        self.mainpanel = MainPanel(self)
+        RootPanel().add(self.mainpanel)
 
     def onModuleLoad(self):
         DocumentCollection.InitialiseDocumentCollection()
@@ -39,9 +44,22 @@ class PYPDDemo:
         params = urllib.urlencode({"edgeids": [] })
         HTTPRequest().asyncPost(url = "/StaticObjects", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
+class EdgePoster(object):
+    def onError(self, text, code):
+        Window.alert("Error code = " + str(code) + " text = " + text)
+
+    def onTimeout(self, text):
+        Window.alert("Error text = " + text)
+
     def onCompletion(self, text):
-        self.mainpanel = MainPanel(self)
-        RootPanel().add(self.mainpanel)
+        print "Edge posting completed"
+        pass
+
+    def __init__(self, edges):
+        assert isinstance(edges, list)
+        #print "posting edges ", edges
+        params = urllib.urlencode({"edges": JSONEncoder(edges) })
+        HTTPRequest().asyncPost(url = "/UploadEdges", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
 class Point(object):
     def __init__(self, x, y):
@@ -75,7 +93,10 @@ class MainPanel(VerticalPanel):
         super(VerticalPanel, self).__init__()
         self.owner = owner
 
-        uuidcompat.BufferUUIDs(100, self.InitialiseScreen)
+        uuidcompat.BufferUUIDs(1000, self.InitialiseScreen)
+
+    def EdgeListener(self, edge):
+        EdgePoster([edge.asDict()])
 
     def InitialiseScreen(self):
         hpanel = HorizontalPanel()
@@ -98,7 +119,10 @@ class MainPanel(VerticalPanel):
         dc = DocumentCollection.documentcollection
         if len(dc.objects[model.Drawing.__class__.__name__]) == 0:
             self.drawing = model.Drawing()
+            self.drawing.history.edgelistener = self.EdgeListener
+            #print "self.drawing = ", self.drawing, " self.drawing.history.edgelistener = ",self.drawing.history.edgelistener
             dc.AddDocumentObject(self.drawing)
+            EdgePoster([a.asDict() for a in self.drawing.history.GetAllEdges()])
         else:
             self.drawing = dc.objects[model.Drawing.__class__.__name__][0]
         self.Draw()
@@ -162,12 +186,12 @@ class MainPanel(VerticalPanel):
         t = model.Triangle(None)
         self.drawing.triangles.add(t)
         t.z_order = c
-        t.x1 = posx
-        t.y1 = posy + 50
-        t.x2 = posx + 100
-        t.y2 = posy + 100
-        t.x3 = posx + 50
-        t.y3 = posy + 150
+        setattr(t, 'x1', posx)
+        setattr(t, 'y1', posy + 50)
+        setattr(t, 'x2', posx + 100)
+        setattr(t, 'y2', posy + 100)
+        setattr(t, 'x3', posx + 50)
+        setattr(t, 'y3', posy + 150)
         self.Draw()
     
 
@@ -185,6 +209,8 @@ class MainPanel(VerticalPanel):
             self.selecteditem = self.FindTriangle(x,y)
         if self.selecteditem is None and self.selectedhandle is None:
             self.selectedhandle = None
+        if self.selecteditem is not None:
+            self.selecteditem.changessuspended = True
         self.Draw()
         self.lastx = x
         self.lasty = y
@@ -195,26 +221,35 @@ class MainPanel(VerticalPanel):
             diffy = y - self.lasty
             t = self.selecteditem
             if self.selectedhandle is None:
-                t.x1 = t.x1 + diffx
-                t.y1 = t.y1 + diffy
-                t.x2 = t.x2 + diffx
-                t.y2 = t.y2 + diffy
-                t.x3 = t.x3 + diffx
-                t.y3 = t.y3 + diffy
+                setattr(t, 'x1', t.x1 + diffx)
+                setattr(t, 'y1', t.y1 + diffy)
+                setattr(t, 'x2', t.x2 + diffx)
+                setattr(t, 'y2', t.y2 + diffy)
+                setattr(t, 'x3', t.x3 + diffx)
+                setattr(t, 'y3', t.y3 + diffy)
             elif self.selectedhandle == 1:
-                t.x1 = t.x1 + diffx
-                t.y1 = t.y1 + diffy
+                setattr(t, 'x1', t.x1 + diffx)
+                setattr(t, 'y1', t.y1 + diffy)
             elif self.selectedhandle == 2:
-                t.x2 = t.x2 + diffx
-                t.y2 = t.y2 + diffy
+                setattr(t, 'x2', t.x2 + diffx)
+                setattr(t, 'y2', t.y2 + diffy)
             elif self.selectedhandle == 3:
-                t.x3 = t.x3 + diffx
-                t.y3 = t.y3 + diffy
+                setattr(t, 'x3', t.x3 + diffx)
+                setattr(t, 'y3', t.y3 + diffy)
             self.lastx = x
             self.lasty = y
             self.Draw()
 
     def onMouseUp(self, sender,x, y):
+        if self.mouseisdown:
+            t = self.selecteditem
+            self.selecteditem.changessuspended = False
+            setattr(t, 'x1', t.x1)
+            setattr(t, 'y1', t.y1)
+            setattr(t, 'x2', t.x2)
+            setattr(t, 'y2', t.y2)
+            setattr(t, 'x3', t.x3)
+            setattr(t, 'y3', t.y3)
         self.mouseisdown = False
 
     def onMouseEnter(self, sender, x, y):
