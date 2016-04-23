@@ -57,4 +57,5 @@ class HistoryEdge(object):
             "propertytype":self.propertytype,
          }
 
-
+    def __str__(self):
+        return str(self.asDict())

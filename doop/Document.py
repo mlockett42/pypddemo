@@ -39,6 +39,7 @@ class Document(DocumentObject):
         self.documentobjects = dict()
         self.currentnode = ""
         self.insetattr = False
+        self.WasChanged(ChangeType.ADD_CHILD, "", "", self.id, self.__class__.__name__)
         
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
         #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
@@ -64,5 +65,9 @@ class Document(DocumentObject):
     def GetDocument(self):
         #Return the document
         return self
+
+    def IsDocument(self):
+        #Return if this is a document. Documents have history graphs
+        return True
 
     

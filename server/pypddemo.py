@@ -14,6 +14,10 @@ from twisted.internet.defer import Deferred
 import DocumentCollection
 import model
 import DocumentCollectionHelper
+from HistoryEdgeSimpleProperty import HistoryEdgeSimpleProperty
+from HistoryEdgeAddChild import HistoryEdgeAddChild
+from HistoryEdgeRemoveChild import HistoryEdgeRemoveChild
+from HistoryEdgeNull import HistoryEdgeNull
 
 class PYPDDemoSite(Site):
     def getResourceFor(self, request):
@@ -75,10 +79,19 @@ class UploadEdges(Resource):
     isLeaf = True
 
     def render_POST(self, request):
-        print "raw edge data = ",request.args["edges"][0]
+        edgeclasses = [HistoryEdgeSimpleProperty, HistoryEdgeAddChild, HistoryEdgeRemoveChild, HistoryEdgeNull]
+        edgeclassdict = dict()
+        for cls in edgeclasses:
+            edgeclassdict[cls.__name__] = cls
+
         edges = JSONDecoder().decode(request.args["edges"][0])
-        #edges = JSONDecoder().decode(""" [{"a":"b"}]""")
-        #DocumentCollection.documentcollection.AddEdges(edges)
+        print "edges = ", edges
+        edges = [edgeclassdict[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
+            edge["propertyname"], edge["propertyvalue"], edge["propertytype"]) for edge in edges]
+        print "edges2 = ",edges
+
+        DocumentCollection.documentcollection.AddEdges(edges)
+        DocumentCollectionHelper.SaveEdges(DocumentCollection.documentcollection, 'drawing.history.db', edges)
         print "Edge received " + repr(edges)
         return "OK"
 
@@ -87,7 +100,9 @@ def StartApplication(resource):
     DocumentCollection.InitialiseDocumentCollection()
     DocumentCollection.documentcollection.Register(model.Drawing)
     DocumentCollection.documentcollection.Register(model.Triangle)
+    print "classes = ",DocumentCollection.documentcollection.classes
     DocumentCollectionHelper.LoadDocumentCollection(DocumentCollection.documentcollection, 'drawing.history.db', 'drawing.content.db')
+    print "classes2 = ",DocumentCollection.documentcollection.classes
 
     resource.addChildResources()
     

@@ -22,8 +22,8 @@ class DocumentObject(object):
         self.changessuspended = False
         self.doop_field = dict()
         self.parent = None
-        #if id is None:
-        #    id = uuidcompat.getuuid()
+        if id is None or id != "":
+            id = uuidcompat.getuuid()
         id = uuidcompat.getuuid()
         self.id = id
         variables = [a for a in dir(self.__class__) if not a.startswith('__') and not callable(getattr(self.__class__,a))]
@@ -42,7 +42,7 @@ class DocumentObject(object):
             return
         self.insetattr = True
         if name in self.doop_field:
-            self.WasChanged(ChangeType.SET_PROPERTY_VALUE, self.id, name, value, type(value))
+            self.WasChanged(ChangeType.SET_PROPERTY_VALUE, self.id, name, value, self.doop_field[name].__class__.__name__)
         self.insetattr = False
          
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
@@ -75,6 +75,10 @@ class DocumentObject(object):
 
     def PostProcessCreateFromDict(self, parentobj):
         pass
+
+    def IsDocument(self):
+        #Return if this is a document. Documents have history graphs
+        return False
 
 def GetListAsDicts(l):
     l2 = list()

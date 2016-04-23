@@ -12,11 +12,11 @@ class HistoryGraph(object):
         self.edgelistener = None
 
     def AddEdge(self, edge):
-        #print "Edge added", edge, "self.edgelistener = ", self.edgelistener
         if self.isreplaying:
             return
         if edge.edgeid in self.edges:
             return
+        print "Edge added", edge
         nodes = edge.startnodes
         for node in nodes:
             self.edgesbystartnode[node].append(edge)
@@ -31,6 +31,7 @@ class HistoryGraph(object):
             edge = self.edges[k]
             edge.isplayed = False
         l = self.edgesbystartnode[""]
+        print "l = ", l
         assert len(l) == 1
         self.ReplayEdges(doc, l[0])
         doc.history = self.Clone()

@@ -117,8 +117,8 @@ class MainPanel(VerticalPanel):
         self.selectedhandle = None
         self.mouseisdown = False
         dc = DocumentCollection.documentcollection
-        if len(dc.objects[model.Drawing.__class__.__name__]) == 0:
-            self.drawing = model.Drawing()
+        if len(dc.documentsbyclass[model.Drawing.__class__.__name__]) == 0:
+            self.drawing = model.Drawing(None)
             self.drawing.history.edgelistener = self.EdgeListener
             #print "self.drawing = ", self.drawing, " self.drawing.history.edgelistener = ",self.drawing.history.edgelistener
             dc.AddDocumentObject(self.drawing)
