@@ -30,22 +30,16 @@ class DocumentCollection(object):
         self.classes[theclass.__name__] = theclass
 
     def asJSON(self, notinset):
-        #print "notinset = ",notinset
         ret = list()
         if notinset == None:
             notinfn = lambda x: True
         else:
             notinfn = lambda x: x not in notinset
         for (objid, document) in self.objectsbyid.iteritems():
-            #print "objid = ",objid
-            #print "document = ",document
             if document.IsDocument():
                 history = document.history
-                #print "history = ",history
                 for edgeid in history.edges:
-                    #print "edgeid = ",edgeid
                     edge = history.edges[edgeid]
-                    #print "edge = ",edge
                     startnodes = list(edge.startnodes)
                     if len(edge.startnodes) == 1:
                         startnode1id = startnodes[0]
@@ -56,23 +50,19 @@ class DocumentCollection(object):
                     else:
                         assert False
                     
-                    #print "notinfn(edge.edgeid) = ",notinfn(edge.edgeid)
                     if notinfn(edge.edgeid):
-                        #print "Adding edge.edgeid = ",edge.edgeid
-                        #ret.append([document.id, document.__class__.__name__, edge.__class__.__name__, edge.edgeid, startnode1id, startnode2id, edge.endnode, edge.propertyownerid, edge.propertyname, 
-                        #    str(edge.propertyvalue), edge.propertytype])
                         ret.append(edge.asDict())
         return JSONEncoder().encode(ret)
 
     def GetAllEdgeIDs(self):
         #Return a list of all of the edgeid in this document collection
         l = list()
-        for (objid, document) in self.objectsbyid:
+        for (objid, document) in self.objectsbyid.iteritems():
             if document.IsDocument():
                 history = document.history
                 for edgeid in history.edges:
                     edge = history.edges[edgeid]
-                    l.append(edge.id)
+                    l.append(edge.edgeid)
         return l        
 
     def LoadFromJSON(self, edges):
@@ -80,12 +70,14 @@ class DocumentCollection(object):
         documentclassnamedict = dict()
 
         for edge in edges:
-            #print "edge = ",edge
             edge = self.historyedgeclasses[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
                 edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"], edge["documentclassname"])
 
             if edge.documentid in historygraphdict:
                 historygraph = historygraphdict[edge.documentid]
+            elif edge.documentid in self.objectsbyid:
+                historygraph = self.objectsbyid[edge.documentid].history.Clone()
+                historygraphdict[edge.documentid] = historygraph
             else:
                 historygraph = HistoryGraph()
                 historygraphdict[edge.documentid] = historygraph
@@ -97,16 +89,11 @@ class DocumentCollection(object):
             elif edge.propertytype == "" and edgeclassname == "HistoryEdgeNull":
                 edge.propertyvalue = ""
             documentclassnamedict[edge.documentid] = edge.documentclassname
-            #if startnode2id == "":
-            #    startnodes = {startnode1id}
-            #else:
-            #    startnodes = {startnode1id, startnode2id}
-            #edge = self.historyedgeclasses[edge.classname](edge.edgeid, edge.startnodes, edge.endnodeid, edge.propertyownerid, edge.propertyname, 
-            #    edge.propertyvalue, edge.propertytype, edge.documentid, edge.documentclassname)
             history = historygraphdict[edge.documentid]
             history.AddEdge(edge)
 
         for documentid in historygraphdict:
+            history = historygraphdict[documentid]
             doc = self.classes[documentclassnamedict[documentid]](documentid)
             history.Replay(doc)
             self.AddDocumentObject(doc)

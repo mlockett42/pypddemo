@@ -18,6 +18,8 @@ class HistoryGraph(object):
             return
         nodes = edge.startnodes
         for node in nodes:
+            if node == "":
+                assert len(self.edgesbystartnode[node]) == 0 #There should only be one start node
             self.edgesbystartnode[node].append(edge)
         self.edgesbyendnode[edge.endnode] = edge
         self.edges[edge.edgeid] = edge

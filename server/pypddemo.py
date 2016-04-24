@@ -73,7 +73,6 @@ class GetStaticObjects(Resource):
     def render_POST(self, request):
         edgeids = JSONDecoder().decode(request.args["edgeids"][0])
         data = DocumentCollection.documentcollection.asJSON(set(edgeids))
-        #print "Sending ",data
         return data
 
 class UploadEdges(Resource):
@@ -100,7 +99,6 @@ def StartApplication(resource):
     DocumentCollection.documentcollection.Register(model.Drawing)
     DocumentCollection.documentcollection.Register(model.Triangle)
     DocumentCollectionHelper.LoadDocumentCollection(DocumentCollection.documentcollection, 'drawing.history.db', 'drawing.content.db')
-    #print DocumentCollection.documentcollection.asJSON(set())
 
     resource.addChildResources()
     

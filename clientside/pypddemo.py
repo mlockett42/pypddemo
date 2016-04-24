@@ -50,6 +50,34 @@ class PYPDDemo:
         params = urllib.urlencode({"edgeids": [] })
         HTTPRequest().asyncPost(url = "/StaticObjects", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
+class StaticObjectsTask(Timer):
+    def __init__(self, callbackfn):
+        super(StaticObjectsTask, self).__init__()
+        self.callbackfn = callbackfn
+
+    def run(self):
+        edgeids = JSONEncoder(DocumentCollection.documentcollection.GetAllEdgeIDs())
+        params = urllib.urlencode({"edgeids": edgeids })
+        HTTPRequest().asyncPost(url = "/StaticObjects", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
+
+    def onError(self, text, code):
+        print("Error code = " + str(code) + " text = " + text)
+        self.ScheduleTask()
+
+    def onTimeout(self, text):
+        print("Error text = " + text)
+        self.ScheduleTask()
+
+    def onCompletion(self, text):
+        edges = JSONDecoder(text)
+        DocumentCollection.documentcollection.LoadFromJSON(edges)
+        self.ScheduleTask()
+        self.callbackfn()
+
+    def ScheduleTask(self):
+        StaticObjectsTask(self.callbackfn).schedule(5000) #Poll every five seconds
+        
+
 class EdgePoster(object):
     def onError(self, text, code):
         Window.alert("Error code = " + str(code) + " text = " + text)
@@ -58,13 +86,11 @@ class EdgePoster(object):
         Window.alert("Error text = " + text)
 
     def onCompletion(self, text):
-        print "Edit uploaded, retuned ", text
         pass
 
     def __init__(self, edges):
-        print "Uploading edge ",edge
         assert isinstance(edges, list)
-        params = urllib.urlencode({"edges": JSONEncoder(edges) })
+        params = urllib.urlencode({"edges":  JSONEncoder(edges)})
         HTTPRequest().asyncPost(url = "/UploadEdges", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
 class Point(object):
@@ -99,6 +125,7 @@ class MainPanel(VerticalPanel):
         super(VerticalPanel, self).__init__()
         self.owner = owner
         self.InitialiseScreen()
+        StaticObjectsTask(self.Draw).schedule(5000) #Poll every five seconds
 
     def EdgeListener(self, edge):
         EdgePoster([edge.asDict()])
@@ -124,13 +151,17 @@ class MainPanel(VerticalPanel):
         dc = DocumentCollection.documentcollection
         DocumentCollection.documentcollection.edgelistener = self.EdgeListener
         if len(dc.documentsbyclass[model.Drawing.__name__]) == 0:
-            self.drawing = model.Drawing(None)
-            dc.AddDocumentObject(self.drawing)
-            EdgePoster([a.asDict() for a in self.drawing.history.GetAllEdges()])
+            drawing = model.Drawing(None)
+            dc.AddDocumentObject(drawing)
+            EdgePoster([a.asDict() for a in drawing.history.GetAllEdges()])
         else:
             for k,v in dc.documentsbyclass[model.Drawing.__name__].iteritems():
-                self.drawing = v
+                drawing = v
+        self.drawingid = drawing.id
         self.Draw()
+
+    def GetDrawing(self):
+        return DocumentCollection.documentcollection.objectsbyid[self.drawingid]
 
     def sortfn(self, t1, t2):
         return cmp(t1.z_order, t2.z_order)
@@ -139,7 +170,7 @@ class MainPanel(VerticalPanel):
         #Return the triangles as an ordinary python list
         #triangles = [self.drawing.triangles.GetDocument().documentobjects[objid] for objid in self.drawing.triangles]
         triangles = list()
-        for triangle in self.drawing.triangles:
+        for triangle in self.GetDrawing().triangles:
             #triangles = self.drawing.GetDocument().documentobjects[objid]
             triangles.append(triangle)
         if len(triangles) > 0:
@@ -185,11 +216,12 @@ class MainPanel(VerticalPanel):
     def addtriangle(self, sender):
         left_margin = 50
         triangle_spacing = 150
-        c = len(self.drawing.triangles)
+        drawing = self.GetDrawing()
+        c = len(drawing.triangles)
         posx = left_margin + c % ((self.CANVAS_WIDTH - left_margin) // triangle_spacing) * triangle_spacing
         posy = c // ((self.CANVAS_WIDTH - left_margin) // triangle_spacing) * triangle_spacing
         t = model.Triangle(None)
-        self.drawing.triangles.add(t)
+        drawing.triangles.add(t)
         t.z_order = c
         setattr(t, 'x1', posx)
         setattr(t, 'y1', posy + 50)
