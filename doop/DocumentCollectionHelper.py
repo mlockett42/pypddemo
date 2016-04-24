@@ -14,9 +14,19 @@ def SaveDocumentCollection(dc, filenameedges, filenamedata):
         pass
     c = sqlite3.connect(filenameedges)
     # Create table
-    c.execute('''CREATE TABLE IF NOT EXISTS edge
-                 (documentid text, documentclassname text, edgeclassname text, edgeid text, startnode1id text, startnode2id text, endnodeid text, 
-                propertyownerid text, propertyname text, propertyvalue text, propertytype text)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS edge (
+                    documentid text, 
+                    documentclassname text, 
+                    edgeclassname text, 
+                    edgeid text PRIMARY KEY, 
+                    startnode1id text, 
+                    startnode2id text, 
+                    endnodeid text, 
+                    propertyownerid text, 
+                    propertyname text, 
+                    propertyvalue text, 
+                    propertytype text
+                )''')
     c.execute("DELETE FROM edge")
     for documentid in dc.objects:
         documentlist = dc.objects[documentid]
@@ -112,8 +122,10 @@ def SaveDocumentObject(self, documentobject, parentobject, foreignkeydict, colum
     sql += ")"
     self.database.execute(sql)
 
-def SaveEdges(dc, filenameedges, edges):
+firstsaved = False
 
+def SaveEdges(dc, filenameedges, edges):
+    print "edges = ",str(edges)
     c = sqlite3.connect(filenameedges)
     # Create table
     for edge in edges:
@@ -132,7 +144,13 @@ def SaveEdges(dc, filenameedges, edges):
         else:
             propertytypename = edge.propertytype
         #try:
-        c.execute("INSERT INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
+        if startnode1id == "":
+            global firstsaved
+            #assert firstsaved == False
+            if firstsaved:
+                continue
+            firstsaved = True
+        c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
                 "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
                 "'" + propertytypename + "')")
         #except:
@@ -231,9 +249,19 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
 
     c = sqlite3.connect(filenameedges)
     cur = c.cursor()    
-    cur.execute('''CREATE TABLE IF NOT EXISTS edge
-                 (documentid text, documentclassname text, edgeclassname text, edgeid text, startnode1id text, startnode2id text, endnodeid text, 
-                propertyownerid text, propertyname text, propertyvalue text, propertytype text)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS edge (
+                    documentid text, 
+                    documentclassname text, 
+                    edgeclassname text, 
+                    edgeid text PRIMARY KEY, 
+                    startnode1id text, 
+                    startnode2id text, 
+                    endnodeid text, 
+                    propertyownerid text, 
+                    propertyname text, 
+                    propertyvalue text, 
+                    propertytype text
+                )''')
     c.commit()
     cur.execute("SELECT documentid, documentclassname, edgeclassname, edgeid, startnode1id, startnode2id, endnodeid, propertyownerid, propertyname, propertyvalue, propertytype FROM edge")
 
