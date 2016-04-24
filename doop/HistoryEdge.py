@@ -11,8 +11,6 @@ class HistoryEdge(object):
 
         
     def RecordPastEdges(self, pastedges, graph):
-        #print "edge = " + self.GetEdgeDescription()
-        #print "pastedges = " + str(pastedges)
         self.pastedges = self.pastedges | set(pastedges)
         edges = graph.edgesbystartnode[self.endnode]
         pastedges.add(self.edgeid)

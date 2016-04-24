@@ -152,9 +152,6 @@ class DocumentCollection(object):
         for propname in obj.doop_field:
             propvalue = obj.doop_field[propname]
             if isinstance(propvalue, FieldList):
-                print "obj = ",obj
-                print "propname = ",propname
-                print "getattr(obj, propname) = ",getattr(obj, propname)
                 for obj2 in getattr(obj, propname):
                     assert obj2.__class__.__name__  in self.classes
                     self.objectsbyid[obj2.id] = obj2
