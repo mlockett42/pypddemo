@@ -33,12 +33,16 @@ class DocumentObject(object):
         self.insetattr = False
         
     def __setattr__(self, name, value):
+        haspreviousvalue = hasattr(self, name)
+        if haspreviousvalue:
+            previousvalue = getattr(self, name)
         super(DocumentObject, self).__setattr__(name, value)
         if name == "insetattr" or name == "parent" or name == "isreplaying" or name == "doop_field" or self.insetattr:
             return
         self.insetattr = True
         if name in self.doop_field:
-            self.WasChanged(ChangeType.SET_PROPERTY_VALUE, self.id, name, value, self.doop_field[name].__class__.__name__)
+            if haspreviousvalue and previousvalue != value:
+                self.WasChanged(ChangeType.SET_PROPERTY_VALUE, self.id, name, value, self.doop_field[name].__class__.__name__)
         self.insetattr = False
          
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):

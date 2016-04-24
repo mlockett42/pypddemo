@@ -25,7 +25,6 @@ class HistoryGraph(object):
             self.edgelistener(edge)
 
     def Replay(self, doc):
-        print "HistoryGraph.Replay called"
         self.isreplaying = True
         for k in self.edges:
             edge = self.edges[k]
