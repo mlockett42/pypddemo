@@ -52,12 +52,10 @@ class EdgePoster(object):
         Window.alert("Error text = " + text)
 
     def onCompletion(self, text):
-        print "Edge posting completed"
         pass
 
     def __init__(self, edges):
         assert isinstance(edges, list)
-        #print "posting edges ", edges
         params = urllib.urlencode({"edges": JSONEncoder(edges) })
         HTTPRequest().asyncPost(url = "/UploadEdges", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
@@ -120,7 +118,6 @@ class MainPanel(VerticalPanel):
         if len(dc.documentsbyclass[model.Drawing.__class__.__name__]) == 0:
             self.drawing = model.Drawing(None)
             self.drawing.history.edgelistener = self.EdgeListener
-            #print "self.drawing = ", self.drawing, " self.drawing.history.edgelistener = ",self.drawing.history.edgelistener
             dc.AddDocumentObject(self.drawing)
             EdgePoster([a.asDict() for a in self.drawing.history.GetAllEdges()])
         else:
