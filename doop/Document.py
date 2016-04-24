@@ -42,16 +42,15 @@ class Document(DocumentObject):
         self.WasChanged(ChangeType.ADD_CHILD, "", "", self.id, self.__class__.__name__)
         
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
-        #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
         nextnode  = uuidcompat.getuuid()
         nodeset = set()
         nodeset.add(self.currentnode)
         if changetype == ChangeType.SET_PROPERTY_VALUE:
-            edge = HistoryEdgeSimpleProperty(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
+            edge = HistoryEdgeSimpleProperty(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id)
         elif changetype == ChangeType.ADD_CHILD:
-            edge = HistoryEdgeAddChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
+            edge = HistoryEdgeAddChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id)
         elif changetype == ChangeType.REMOVE_CHILD:
-            edge = HistoryEdgeRemoveChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype)
+            edge = HistoryEdgeRemoveChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id)
         else:
             assert False
         self.currentnode = nextnode

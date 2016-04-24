@@ -85,14 +85,11 @@ class UploadEdges(Resource):
             edgeclassdict[cls.__name__] = cls
 
         edges = JSONDecoder().decode(request.args["edges"][0])
-        print "edges = ", edges
         edges = [edgeclassdict[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
-            edge["propertyname"], edge["propertyvalue"], edge["propertytype"]) for edge in edges]
-        print "edges2 = ",edges
+            edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"]) for edge in edges]
 
         DocumentCollection.documentcollection.AddEdges(edges)
         DocumentCollectionHelper.SaveEdges(DocumentCollection.documentcollection, 'drawing.history.db', edges)
-        print "Edge received " + repr(edges)
         return "OK"
 
 def StartApplication(resource):
@@ -100,9 +97,7 @@ def StartApplication(resource):
     DocumentCollection.InitialiseDocumentCollection()
     DocumentCollection.documentcollection.Register(model.Drawing)
     DocumentCollection.documentcollection.Register(model.Triangle)
-    print "classes = ",DocumentCollection.documentcollection.classes
     DocumentCollectionHelper.LoadDocumentCollection(DocumentCollection.documentcollection, 'drawing.history.db', 'drawing.content.db')
-    print "classes2 = ",DocumentCollection.documentcollection.classes
 
     resource.addChildResources()
     

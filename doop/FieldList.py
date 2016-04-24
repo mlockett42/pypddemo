@@ -11,7 +11,6 @@ class FieldList(Field):
             self.l = set()
 
         def add(self, obj):
-            #print "obj added to FieldListImpl ", obj
             assert isinstance(obj, self.theclass)
             self.l.add(obj.id)
             assert obj.parent is None
@@ -27,7 +26,6 @@ class FieldList(Field):
             self.WasChanged(ChangeType.REMOVE_CHILD, self.parent.id, self.name, objid, obj.__class__)            
 
         def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
-            #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
             assert isinstance(propertyownerid, basestring)
             self.parent.WasChanged(changetype, propertyownerid, propertyname, propertyvalue, propertytype)
 

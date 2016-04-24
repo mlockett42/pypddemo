@@ -127,22 +127,16 @@ class DocumentCollection(object):
 
         for edge in edges:
             if isinstance(edge, HistoryEdgeAddChild) and edge.propertyownerid == "" and edge.propertyname == "":
-                #A new document is being created by this edge
-                doc = self.classes[edge.propertytype](edge.propertyvalue)
-                doc.history = HistoryGraph()
+                #A new object is being created by this edge
+                obj = self.classes[edge.propertytype](edge.propertyvalue)
+                #This is a new document so it has no parent
+                obj.history = HistoryGraph()
                 #Fixme: Add a creation function that does put any thing into the historygraph
-                self.AddDocumentObject(doc)
+                self.AddDocumentObject(obj)
             else:
-                doc = self.objectsbyid[edge.propertyownerid].GetDocument()
-            #    continue
-            #if edge.propertyownerid not in self.objectsbyid:
-            #    doc = self.classes[edge.propertytype](edge.propertyownerid)
-            #    self.AddDocumentObject(doc)
-            #print "self.documentsbyclass = ",self.documentsbyclass
-            #print "edge.propertytype = ",edge.propertytype
-            #print "edge.propertyownerid = ",edge.propertyownerid
-            doc.history.AddEdge(edge)
-            changes.add(doc.id)
+                obj = self.objectsbyid[edge.documentid].GetDocument()
+            obj.history.AddEdge(edge)
+            changes.add(obj.id)
 
         for documentid in changes:
             doc = self.objectsbyid[documentid]
@@ -150,11 +144,9 @@ class DocumentCollection(object):
 
        
     def GetByClass(self, theclass):
-        #print "Getting object of class " + theclass.__name__
         return self.documentsbyclass[theclass.__name__]
 
     def AddDocumentObject(self, obj):
-        #print "Added object of class " + obj.__class__.__name__
         assert isinstance(obj, DocumentObject)
         assert obj.__class__.__name__  in self.classes
         for propname in obj.doop_field:

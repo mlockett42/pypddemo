@@ -17,14 +17,12 @@ class DocumentObject(object):
         return ret
     
     def __init__(self, id):
-        #print "Debug 1"
         self.insetattr = True
         self.changessuspended = False
         self.doop_field = dict()
         self.parent = None
-        if id is None or id != "":
+        if id is None or id == "":
             id = uuidcompat.getuuid()
-        id = uuidcompat.getuuid()
         self.id = id
         variables = [a for a in dir(self.__class__) if not a.startswith('__') and not callable(getattr(self.__class__,a))]
         for k in variables:
@@ -33,10 +31,8 @@ class DocumentObject(object):
             if isinstance(var, Field):
                 setattr(self, k, var.CreateInstance(self, k))
         self.insetattr = False
-        #print "Debug 10 self.insetattr = ",self.insetattr
         
     def __setattr__(self, name, value):
-        #print "__setattr__ called self = ", self, " name = ", name, " value = ", value, " self.insetattr = ",self.insetattr
         super(DocumentObject, self).__setattr__(name, value)
         if name == "insetattr" or name == "parent" or name == "isreplaying" or name == "doop_field" or self.insetattr:
             return
@@ -48,7 +44,6 @@ class DocumentObject(object):
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
         if self.changessuspended:
             return
-        #print "was changed called self = ", self, changetype, propertyownerid, propertyname, propertyvalue, propertytype
         if self.parent is not None:
             assert isinstance(propertyownerid, basestring)
             self.parent.WasChanged(changetype, propertyownerid, propertyname, propertyvalue, propertytype)
@@ -83,7 +78,6 @@ class DocumentObject(object):
 def GetListAsDicts(l):
     l2 = list()
     for obj in l:
-        #print "obj = " + repr(obj)
         l2.append(obj.AsDict())
     return l2
 

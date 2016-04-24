@@ -16,7 +16,6 @@ class HistoryGraph(object):
             return
         if edge.edgeid in self.edges:
             return
-        print "Edge added", edge
         nodes = edge.startnodes
         for node in nodes:
             self.edgesbystartnode[node].append(edge)
@@ -26,12 +25,12 @@ class HistoryGraph(object):
             self.edgelistener(edge)
 
     def Replay(self, doc):
+        print "HistoryGraph.Replay called"
         self.isreplaying = True
         for k in self.edges:
             edge = self.edges[k]
             edge.isplayed = False
         l = self.edgesbystartnode[""]
-        print "l = ", l
         assert len(l) == 1
         self.ReplayEdges(doc, l[0])
         doc.history = self.Clone()
@@ -91,9 +90,6 @@ class HistoryGraph(object):
             edge1 = self.edges[k1]
             for k2 in self.edges:
                 edge2 = self.edges[k2]
-
-                #print "edge1 = " + edge1.GetEdgeDescription()
-                #print "edge2 = " + edge2.GetEdgeDescription()
                 if k1 != k2:
                     if not edge2.HasPastEdge(k1) and not edge1.HasPastEdge(k2):
                         edge1.CompareForConflicts(edge2)

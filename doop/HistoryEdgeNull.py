@@ -2,15 +2,15 @@
 from HistoryEdge import HistoryEdge
 
 class HistoryEdgeNull(HistoryEdge):
-    def __init__(self, edgeid, startnodes, endnode, propertyownerid, propertyname, propertyvalue, propertytype):
-        super(HistoryEdgeNull, self).__init__(edgeid, startnodes, endnode)
+    def __init__(self, edgeid, startnodes, endnode, propertyownerid, propertyname, propertyvalue, propertytype, documentid):
+        super(HistoryEdgeNull, self).__init__(edgeid, startnodes, endnode, documentid)
         self.propertyownerid = propertyownerid
         self.propertyname = propertyname
         self.propertyvalue = propertyvalue
         self.propertytype = propertytype
 
     def Clone(self):
-        return HistoryEdgeNull(self.edgeid, set(self.startnodes), self.endnode, self.propertyownerid, self.propertyname, self.propertyvalue, self.propertytype)
+        return HistoryEdgeNull(self.edgeid, set(self.startnodes), self.endnode, self.propertyownerid, self.propertyname, self.propertyvalue, self.propertytype, self.documentid)
 
     def Replay(self, doc):
         pass
