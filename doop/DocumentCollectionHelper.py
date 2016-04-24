@@ -260,24 +260,20 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
             historygraph = HistoryGraph()
             historygraphdict[documentid] = historygraph
             documentclassnamedict[documentid] = documentclassname
-        if propertytypestr == "int":
-            propertytype = int
+        if propertytypestr == "FieldInt":
             propertyvalue = int(propertyvaluestr)
-        elif propertytypestr == "basestring":
-            propertytype = basestring
+        elif propertytypestr == "FieldText":
             propertyvalue = str(propertyvaluestr)
         elif propertytypestr == "" and edgeclassname == "HistoryEdgeNull":
-            propertytype = None
             propertyvalue = ""
         else:
-            propertytype = dc.classes[propertytypestr]
             propertyvalue = propertyvaluestr
         documentclassnamedict[documentid] = documentclassname
         if startnode2id == "":
             startnodes = {startnode1id}
         else:
             startnodes = {startnode1id, startnode2id}
-        edge = dc.historyedgeclasses[edgeclassname](edgeid, startnodes, endnodeid, propertyownerid, propertyname, propertyvalue, propertytype)
+        edge = dc.historyedgeclasses[edgeclassname](edgeid, startnodes, endnodeid, propertyownerid, propertyname, propertyvalue, propertytypestr, documentid, documentclassname)
         history = historygraphdict[documentid]
         history.AddEdge(edge)
 
