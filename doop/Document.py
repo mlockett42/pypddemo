@@ -46,11 +46,11 @@ class Document(DocumentObject):
         nodeset = set()
         nodeset.add(self.currentnode)
         if changetype == ChangeType.SET_PROPERTY_VALUE:
-            edge = HistoryEdgeSimpleProperty(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id)
+            edge = HistoryEdgeSimpleProperty(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
         elif changetype == ChangeType.ADD_CHILD:
-            edge = HistoryEdgeAddChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id)
+            edge = HistoryEdgeAddChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
         elif changetype == ChangeType.REMOVE_CHILD:
-            edge = HistoryEdgeRemoveChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id)
+            edge = HistoryEdgeRemoveChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
         else:
             assert False
         self.currentnode = nextnode

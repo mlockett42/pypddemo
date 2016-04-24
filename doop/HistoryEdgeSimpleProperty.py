@@ -4,8 +4,8 @@ from FieldInt import FieldInt
 
 class HistoryEdgeSimpleProperty(HistoryEdge):
     def __init__(self, edgeid, startnodes, endnode, propertyownerid,
-                 propertyname, propertyvalue, propertytype, documentid):
-        super(HistoryEdgeSimpleProperty, self).__init__(edgeid, startnodes, endnode, documentid)
+                 propertyname, propertyvalue, propertytype, documentid, documentclassname):
+        super(HistoryEdgeSimpleProperty, self).__init__(edgeid, startnodes, endnode, documentid, documentclassname)
         self.propertyownerid = propertyownerid
         self.propertyname = propertyname
         self.propertyvalue = propertyvalue
@@ -21,7 +21,7 @@ class HistoryEdgeSimpleProperty(HistoryEdge):
     def Clone(self):
         return HistoryEdgeSimpleProperty(self.edgeid, self.startnodes, self.endnode,
                 self.propertyownerid, self.propertyname, self.propertyvalue,
-                self.propertytype, self.documentid)
+                self.propertytype, self.documentid, self.documentclassname)
 
     def GetConflictWinner(self, edge2):
         if self.propertyownerid != edge2.propertyownerid:

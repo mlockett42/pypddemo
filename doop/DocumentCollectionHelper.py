@@ -131,12 +131,12 @@ def SaveEdges(dc, filenameedges, edges):
             propertytypename = ""
         else:
             propertytypename = edge.propertytype
-        try:
-            c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
+        #try:
+        c.execute("INSERT INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
                 "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
                 "'" + propertytypename + "')")
-        except:
-            pass
+        #except:
+        #    pass
 
     c.commit()
     c.close()

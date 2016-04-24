@@ -1,11 +1,12 @@
 #The base class for edges in DOOP
 
 class HistoryEdge(object):
-    def __init__(self, edgeid, startnodes, endnode, documentid):
+    def __init__(self, edgeid, startnodes, endnode, documentid, documentclassname):
         self.edgeid = edgeid
         self.startnodes = startnodes
         self.endnode = endnode
         self.documentid = documentid
+        self.documentclassname = documentclassname
         self.inactive = False
         self.played = False
 
@@ -55,6 +56,7 @@ class HistoryEdge(object):
             "propertyname":self.propertyname,
             "propertytype":self.propertytype,
             "documentid":self.documentid,
+            "documentclassname":self.documentclassname,
          }
 
     def __str__(self):

@@ -69,16 +69,20 @@ class HistoryGraph(object):
         for k in graph.edges:
             edge = graph.edges[k]
             self.AddEdge(edge)
+            documentid = edge.documentid
+            documentclassname = edge.documentclassname
         presentnodes = set()
         for k in self.edges:
             edge = self.edges[k]
+            documentid = edge.documentid
+            documentclassname = edge.documentclassname
             l = self.edgesbystartnode[edge.endnode]
             if len(l) == 0:
                 presentnodes.add(edge.endnode)
         if len(presentnodes) > 1:
             assert len(presentnodes) == 2
             nextnode = uuidcompat.getuuid()
-            nulledge = HistoryEdgeNull(uuidcompat.getuuid(), presentnodes, nextnode, "", "", "", None)
+            nulledge = HistoryEdgeNull(uuidcompat.getuuid(), presentnodes, nextnode, "", "", "", "", documentid, documentclassname)
             self.AddEdge(nulledge)
 
     def ProcessConflictWinners(self):
