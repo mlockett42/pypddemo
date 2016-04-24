@@ -41,7 +41,7 @@ class DocumentObject(object):
             return
         self.insetattr = True
         if name in self.doop_field:
-            if haspreviousvalue and previousvalue != value:
+            #if haspreviousvalue and previousvalue != value:
                 self.WasChanged(ChangeType.SET_PROPERTY_VALUE, self.id, name, value, self.doop_field[name].__class__.__name__)
         self.insetattr = False
          

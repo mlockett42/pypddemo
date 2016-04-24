@@ -33,11 +33,8 @@ class PYPDDemo:
         Window.alert("Error text = " + text)
 
     def onCompletion(self, text):
-        print "text = ",text
         edges = JSONDecoder(text)
         DocumentCollection.documentcollection.LoadFromJSON(edges)
-        print "documentsbyclass = ", DocumentCollection.documentcollection.documentsbyclass
-        print "objectsbyid = ", DocumentCollection.documentcollection.objectsbyid
 
         self.mainpanel = MainPanel(self)
         RootPanel().add(self.mainpanel)
@@ -61,9 +58,11 @@ class EdgePoster(object):
         Window.alert("Error text = " + text)
 
     def onCompletion(self, text):
+        print "Edit uploaded, retuned ", text
         pass
 
     def __init__(self, edges):
+        print "Uploading edge ",edge
         assert isinstance(edges, list)
         params = urllib.urlencode({"edges": JSONEncoder(edges) })
         HTTPRequest().asyncPost(url = "/UploadEdges", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
@@ -123,9 +122,6 @@ class MainPanel(VerticalPanel):
         self.selectedhandle = None
         self.mouseisdown = False
         dc = DocumentCollection.documentcollection
-        print "dc.documentsbyclass = ",dc.documentsbyclass
-        print "model.Drawing.__class__.__name__ = ",model.Drawing.__class__.__name__
-        print "len(dc.documentsbyclass[model.Drawing.__name__]) = ",len(dc.documentsbyclass[model.Drawing.__name__])
         if len(dc.documentsbyclass[model.Drawing.__name__]) == 0:
             self.drawing = model.Drawing(None)
             self.drawing.history.edgelistener = self.EdgeListener
@@ -250,7 +246,7 @@ class MainPanel(VerticalPanel):
             self.Draw()
 
     def onMouseUp(self, sender,x, y):
-        if self.mouseisdown:
+        if self.mouseisdown and self.selecteditem:
             t = self.selecteditem
             self.selecteditem.changessuspended = False
             setattr(t, 'x1', t.x1)

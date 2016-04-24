@@ -79,7 +79,7 @@ class DocumentCollection(object):
         documentclassnamedict = dict()
 
         for edge in edges:
-            print "edge = ",edge
+            #print "edge = ",edge
             edge = self.historyedgeclasses[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
                 edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"], edge["documentclassname"])
 
