@@ -29,16 +29,22 @@ class DocumentCollection(object):
         self.classes[theclass.__name__] = theclass
 
     def asJSON(self, notinset):
+        #print "notinset = ",notinset
         ret = list()
         if notinset == None:
             notinfn = lambda x: True
         else:
-            notinfn = lambda x: x in notinset
-        for (objid, document) in self.objectsbyid:
+            notinfn = lambda x: x not in notinset
+        for (objid, document) in self.objectsbyid.iteritems():
+            #print "objid = ",objid
+            #print "document = ",document
             if document.IsDocument():
                 history = document.history
+                #print "history = ",history
                 for edgeid in history.edges:
+                    #print "edgeid = ",edgeid
                     edge = history.edges[edgeid]
+                    #print "edge = ",edge
                     startnodes = list(edge.startnodes)
                     if len(edge.startnodes) == 1:
                         startnode1id = startnodes[0]
@@ -49,13 +55,12 @@ class DocumentCollection(object):
                     else:
                         assert False
                     
-                    if edge.propertytype is None:
-                        propertytypename = ""
-                    else:
-                        propertytypename = edge.propertytype.__name__
+                    #print "notinfn(edge.edgeid) = ",notinfn(edge.edgeid)
                     if notinfn(edge.edgeid):
-                        ret.append([document.id, document.__class__.__name__, edge.__class__.__name__, edge.edgeid, startnode1id, startnode2id, edge.endnode, edge.propertyownerid, edge.propertyname, 
-                            str(edge.propertyvalue), propertytypename])
+                        #print "Adding edge.edgeid = ",edge.edgeid
+                        #ret.append([document.id, document.__class__.__name__, edge.__class__.__name__, edge.edgeid, startnode1id, startnode2id, edge.endnode, edge.propertyownerid, edge.propertyname, 
+                        #    str(edge.propertyvalue), edge.propertytype])
+                        ret.append(edge.asDict())
         return JSONEncoder().encode(ret)
 
     def GetAllEdgeIDs(self):
@@ -69,50 +74,35 @@ class DocumentCollection(object):
                     l.append(edge.id)
         return l        
 
-    def LoadFromJSON(self, jsontext):
+    def LoadFromJSON(self, edges):
         historygraphdict = defaultdict(HistoryGraph)
         documentclassnamedict = dict()
 
-        rows = JSONDecoder().decode(jsontext)
+        for edge in edges:
+            print "edge = ",edge
+            edge = self.historyedgeclasses[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
+                edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"], edge["documentclassname"])
 
-        for row in rows:
-            documentid = row[0]
-            documentclassname = row[1]
-            edgeclassname = row[2]
-            edgeid = row[3]
-            startnode1id = row[4]
-            startnode2id = row[5]
-            endnodeid = row[6]
-            propertyownerid = row[7]
-            propertyname = row[8]
-            propertyvaluestr = row[9]
-            propertytypestr = row[10]
-
-            if documentid in historygraphdict:
-                historygraph = historygraphdict[documentid]
+            if edge.documentid in historygraphdict:
+                historygraph = historygraphdict[edge.documentid]
             else:
                 historygraph = HistoryGraph()
-                historygraphdict[documentid] = historygraph
-                documentclassnamedict[documentid] = documentclassname
-            if propertytypestr == "int":
-                propertytype = int
-                propertyvalue = int(propertyvaluestr)
-            elif propertytypestr == "basestring":
+                historygraphdict[edge.documentid] = historygraph
+            if edge.propertytype == "FieldInt":
+                propertyvalue = int(edge.propertyvalue)
+            elif edge.propertytype == "FieldText":
                 propertytype = basestring
-                propertyvalue = str(propertyvaluestr)
-            elif propertytypestr == "" and edgeclassname == "HistoryEdgeNull":
-                propertytype = None
-                propertyvalue = ""
-            else:
-                propertytype = self.classes[propertytypestr]
-                propertyvalue = propertyvaluestr
-            documentclassnamedict[documentid] = documentclassname
-            if startnode2id == "":
-                startnodes = {startnode1id}
-            else:
-                startnodes = {startnode1id, startnode2id}
-            edge = self.historyedgeclasses[edgeclassname](edgeid, startnodes, endnodeid, propertyownerid, propertyname, propertyvalue, propertytype)
-            history = historygraphdict[documentid]
+                propertyvalue = str(edge.propertyvalue)
+            elif edge.propertytype == "" and edgeclassname == "HistoryEdgeNull":
+                edge.propertyvalue = ""
+            documentclassnamedict[edge.documentid] = edge.documentclassname
+            #if startnode2id == "":
+            #    startnodes = {startnode1id}
+            #else:
+            #    startnodes = {startnode1id, startnode2id}
+            #edge = self.historyedgeclasses[edge.classname](edge.edgeid, edge.startnodes, edge.endnodeid, edge.propertyownerid, edge.propertyname, 
+            #    edge.propertyvalue, edge.propertytype, edge.documentid, edge.documentclassname)
+            history = historygraphdict[edge.documentid]
             history.AddEdge(edge)
 
         for documentid in historygraphdict:

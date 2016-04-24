@@ -280,6 +280,7 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
     for documentid in historygraphdict:
         doc = dc.classes[documentclassnamedict[documentid]](documentid)
         history.Replay(doc)
+        #print "documentid = ",documentid, " history.edges = ", history.edges
         dc.AddDocumentObject(doc)
 
     return sqlite3.connect(filenamedata) #Return the database that can used for get sql objects

@@ -33,6 +33,12 @@ class PYPDDemo:
         Window.alert("Error text = " + text)
 
     def onCompletion(self, text):
+        print "text = ",text
+        edges = JSONDecoder(text)
+        DocumentCollection.documentcollection.LoadFromJSON(edges)
+        print "documentsbyclass = ", DocumentCollection.documentcollection.documentsbyclass
+        print "objectsbyid = ", DocumentCollection.documentcollection.objectsbyid
+
         self.mainpanel = MainPanel(self)
         RootPanel().add(self.mainpanel)
 
@@ -41,6 +47,9 @@ class PYPDDemo:
         DocumentCollection.documentcollection.Register(model.Drawing)
         DocumentCollection.documentcollection.Register(model.Triangle)
 
+        uuidcompat.BufferUUIDs(1000, self.LoadStaticObjects)
+
+    def LoadStaticObjects(self):
         params = urllib.urlencode({"edgeids": [] })
         HTTPRequest().asyncPost(url = "/StaticObjects", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
@@ -90,8 +99,7 @@ class MainPanel(VerticalPanel):
     def __init__(self, owner):
         super(VerticalPanel, self).__init__()
         self.owner = owner
-
-        uuidcompat.BufferUUIDs(1000, self.InitialiseScreen)
+        self.InitialiseScreen()
 
     def EdgeListener(self, edge):
         EdgePoster([edge.asDict()])
@@ -115,13 +123,17 @@ class MainPanel(VerticalPanel):
         self.selectedhandle = None
         self.mouseisdown = False
         dc = DocumentCollection.documentcollection
-        if len(dc.documentsbyclass[model.Drawing.__class__.__name__]) == 0:
+        print "dc.documentsbyclass = ",dc.documentsbyclass
+        print "model.Drawing.__class__.__name__ = ",model.Drawing.__class__.__name__
+        print "len(dc.documentsbyclass[model.Drawing.__name__]) = ",len(dc.documentsbyclass[model.Drawing.__name__])
+        if len(dc.documentsbyclass[model.Drawing.__name__]) == 0:
             self.drawing = model.Drawing(None)
             self.drawing.history.edgelistener = self.EdgeListener
             dc.AddDocumentObject(self.drawing)
             EdgePoster([a.asDict() for a in self.drawing.history.GetAllEdges()])
         else:
-            self.drawing = dc.objects[model.Drawing.__class__.__name__][0]
+            for k,v in dc.documentsbyclass[model.Drawing.__name__].iteritems():
+                self.drawing = v
         self.Draw()
 
     def sortfn(self, t1, t2):
