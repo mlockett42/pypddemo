@@ -146,9 +146,9 @@ def SaveEdges(dc, filenameedges, edges):
         #try:
         if startnode1id == "":
             global firstsaved
-            #assert firstsaved == False
-            if firstsaved:
-                continue
+            assert firstsaved == False
+            #if firstsaved:
+            #    continue
             firstsaved = True
         c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
                 "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
