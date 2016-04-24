@@ -122,9 +122,9 @@ class MainPanel(VerticalPanel):
         self.selectedhandle = None
         self.mouseisdown = False
         dc = DocumentCollection.documentcollection
+        DocumentCollection.documentcollection.edgelistener = self.EdgeListener
         if len(dc.documentsbyclass[model.Drawing.__name__]) == 0:
             self.drawing = model.Drawing(None)
-            self.drawing.history.edgelistener = self.EdgeListener
             dc.AddDocumentObject(self.drawing)
             EdgePoster([a.asDict() for a in self.drawing.history.GetAllEdges()])
         else:

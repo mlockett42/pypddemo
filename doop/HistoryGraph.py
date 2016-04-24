@@ -2,6 +2,7 @@
 from collections import defaultdict
 import uuidcompat
 from HistoryEdgeNull import HistoryEdgeNull
+import DocumentCollection
 
 class HistoryGraph(object):
     def __init__(self):
@@ -9,7 +10,6 @@ class HistoryGraph(object):
         self.edgesbyendnode = dict()
         self.edges = dict()
         self.isreplaying = False
-        self.edgelistener = None
 
     def AddEdge(self, edge):
         if self.isreplaying:
@@ -21,8 +21,8 @@ class HistoryGraph(object):
             self.edgesbystartnode[node].append(edge)
         self.edgesbyendnode[edge.endnode] = edge
         self.edges[edge.edgeid] = edge
-        if self.edgelistener is not None:
-            self.edgelistener(edge)
+        if DocumentCollection.documentcollection.edgelistener is not None:
+            DocumentCollection.documentcollection.edgelistener(edge)
 
     def Replay(self, doc):
         self.isreplaying = True

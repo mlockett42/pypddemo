@@ -24,6 +24,7 @@ class DocumentCollection(object):
         self.historyedgeclasses[HistoryEdgeAddChild.__name__] = HistoryEdgeAddChild
         self.historyedgeclasses[HistoryEdgeRemoveChild.__name__] = HistoryEdgeRemoveChild
         self.historyedgeclasses[HistoryEdgeNull.__name__] = HistoryEdgeNull
+        self.edgelistener = None
 
     def Register(self, theclass):
         self.classes[theclass.__name__] = theclass

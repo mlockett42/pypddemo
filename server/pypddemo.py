@@ -81,7 +81,6 @@ class UploadEdges(Resource):
     isLeaf = True
 
     def render_POST(self, request):
-        print "edge received"
         edgeclasses = [HistoryEdgeSimpleProperty, HistoryEdgeAddChild, HistoryEdgeRemoveChild, HistoryEdgeNull]
         edgeclassdict = dict()
         for cls in edgeclasses:
