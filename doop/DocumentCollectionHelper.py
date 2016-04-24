@@ -123,9 +123,10 @@ def SaveDocumentObject(self, documentobject, parentobject, foreignkeydict, colum
     self.database.execute(sql)
 
 firstsaved = False
+firstsavededgeid = ""
 
 def SaveEdges(dc, filenameedges, edges):
-    print "edges = ",str(edges)
+    #print "edges = ",str(edges)
     c = sqlite3.connect(filenameedges)
     # Create table
     for edge in edges:
@@ -145,8 +146,15 @@ def SaveEdges(dc, filenameedges, edges):
             propertytypename = edge.propertytype
         #try:
         if startnode1id == "":
+            global firstsavededgeid
+            if firstsavededgeid == "":
+                firstsavededgeid = edge.edgeid
             global firstsaved
-            assert firstsaved == False
+            #print "saving edge = ",edge.asDict()
+            #print "firstsaved = ",firstsaved
+            #print "firstsavededgeid = ",firstsavededgeid
+            #print "edge.edgeid = ",edge.edgeid
+            assert firstsaved == False or firstsavededgeid == edge.edgeid
             #if firstsaved:
             #    continue
             firstsaved = True

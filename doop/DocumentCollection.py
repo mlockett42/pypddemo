@@ -66,6 +66,8 @@ class DocumentCollection(object):
         return l        
 
     def LoadFromJSON(self, edges):
+        edgelistener = self.edgelistener
+        self.edgelistener = None
         historygraphdict = defaultdict(HistoryGraph)
         documentclassnamedict = dict()
 
@@ -97,7 +99,8 @@ class DocumentCollection(object):
             doc = self.classes[documentclassnamedict[documentid]](documentid)
             history.Replay(doc)
             self.AddDocumentObject(doc)
-            
+
+        self.edgelistener = edgelistener
        
     def AddEdges(self, edges):
         #A set of edges is received over the internet add them and replay the objects
@@ -114,8 +117,8 @@ class DocumentCollection(object):
             else:
                 obj = self.objectsbyid[edge.documentid].GetDocument()
             if edge.startnodes[0] == "":
-                print "obj.history.edgesbystartnode = ",obj.history.edgesbystartnode
-                print "obj.history.edges = ",obj.history.edges;
+                #print "obj.history.edgesbystartnode = ",obj.history.edgesbystartnode
+                #print "obj.history.edges = ",obj.history.edges;
                 assert "" not in obj.history.edgesbystartnode
             obj.history.AddEdge(edge)
             changes.add(obj.id)

@@ -91,6 +91,7 @@ class EdgePoster(object):
     def __init__(self, edges):
         assert isinstance(edges, list)
         params = urllib.urlencode({"edges":  JSONEncoder(edges)})
+        #print "posting edges = ",[edge.asDict() for edge in edges]
         HTTPRequest().asyncPost(url = "/UploadEdges", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
 class Point(object):
