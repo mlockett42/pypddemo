@@ -115,7 +115,7 @@ class HistoryGraph(object):
         ret = set()
         edge = None
         for edge in self.edgesbystartnode[startnodeid]:
-            ret = ret | self.GetGraphEndNodesImpl(edge.endnode)
+            ret = ret.union(self.GetGraphEndNodesImpl(edge.endnode))
         if edge is None:
             print "GetGraphEndNodesImpl endnode found at ",startnodeid
             return { startnodeid }
