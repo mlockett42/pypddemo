@@ -27,6 +27,7 @@ class HistoryGraph(object):
             DocumentCollection.documentcollection.edgelistener(edge)
 
     def Replay(self, doc):
+        assert len(self.GetGraphEndNodes()) <= 1 #Confirm we don't need to merge before doing the replay
         self.isreplaying = True
         for k in self.edges:
             edge = self.edges[k]
@@ -105,5 +106,20 @@ class HistoryGraph(object):
             ret.append(v)
         return ret
 
+    def GetGraphEndNodes(self):
+        return self.GetGraphEndNodesImpl("")
 
+    def GetGraphEndNodesImpl(self, startnodeid):
+        print "GetGraphEndNodesImpl called for ",startnodeid
+        #Returns a set of the edgeids of edges where the end nodes have no start node
+        ret = set()
+        edge = None
+        for edge in self.edgesbystartnode[startnodeid]:
+            ret = ret | self.GetGraphEndNodesImpl(edge.endnode)
+        if edge is None:
+            print "GetGraphEndNodesImpl endnode found at ",startnodeid
+            return { startnodeid }
+        else:
+            print "GetGraphEndNodesImpl no endnode found returning ",ret
+            return ret
         
