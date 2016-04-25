@@ -84,7 +84,7 @@ class HistoryGraph(object):
                 presentnodes.add(edge.endnode)
         if len(presentnodes) > 1:
             assert len(presentnodes) == 2
-            nextnode = uuidcompat.getuuid()
+            extnode = uuidcompat.getuuid()
             nulledge = HistoryEdgeNull(uuidcompat.getuuid(), presentnodes, nextnode, "", "", "", "", documentid, documentclassname)
             self.AddEdge(nulledge)
 
@@ -110,16 +110,31 @@ class HistoryGraph(object):
         return self.GetGraphEndNodesImpl("")
 
     def GetGraphEndNodesImpl(self, startnodeid):
-        print "GetGraphEndNodesImpl called for ",startnodeid
+        #print "GetGraphEndNodesImpl called for ",startnodeid
         #Returns a set of the edgeids of edges where the end nodes have no start node
         ret = set()
         edge = None
         for edge in self.edgesbystartnode[startnodeid]:
             ret = ret.union(self.GetGraphEndNodesImpl(edge.endnode))
         if edge is None:
-            print "GetGraphEndNodesImpl endnode found at ",startnodeid
+            #print "GetGraphEndNodesImpl endnode found at ",startnodeid
             return { startnodeid }
         else:
-            print "GetGraphEndNodesImpl no endnode found returning ",ret
+            #print "GetGraphEndNodesImpl no endnode found returning ",ret
             return ret
+
+    def MergeDanglingBranches(self):
+        print "MergeDanglingBranches called"
+        endnodes = self.GetGraphEndNodes()
+        if len(endnodes) <= 1:
+            print "No dangling end nodes detected
+            return #There are no dangling end node
+        #Create a merge node for the first two dangling end node
+        endnodes = list(endnodes)
+        print len(endnodes), " dangling end node detect merging the first two"
+        nextnode = uuidcompat.getuuid()
+        nulledge = HistoryEdgeNull(uuidcompat.getuuid(), endnodes[0:2], nextnode, "", "", "", "", documentid, documentclassname)
+        self.AddEdge(nulledge)
+        self.MergeDanglingBranches() #Recur because there may be more than two nodes witing to be merged
+
         

@@ -97,6 +97,7 @@ class DocumentCollection(object):
         for documentid in historygraphdict:
             history = historygraphdict[documentid]
             doc = self.classes[documentclassnamedict[documentid]](documentid)
+            history.MergeDanglingBranches()
             history.Replay(doc)
             self.AddDocumentObject(doc)
 
@@ -125,6 +126,7 @@ class DocumentCollection(object):
 
         for documentid in changes:
             doc = self.objectsbyid[documentid]
+            doc.history.MergeDanglingBranches()
             doc.history.Replay(doc)
 
        

@@ -315,6 +315,7 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
 
     for documentid in historygraphdict:
         doc = dc.classes[documentclassnamedict[documentid]](documentid)
+        history.MergeDanglingBranches()
         history.Replay(doc)
         #print "documentid = ",documentid, " history.edges = ", history.edges
         dc.AddDocumentObject(doc)
