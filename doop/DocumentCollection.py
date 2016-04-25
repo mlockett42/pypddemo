@@ -122,8 +122,6 @@ class DocumentCollection(object):
             else:
                 obj = self.objectsbyid[edge.documentid].GetDocument()
             if edge.startnodes[0] == "":
-                #print "obj.history.edgesbystartnode = ",obj.history.edgesbystartnode
-                #print "obj.history.edges = ",obj.history.edges;
                 assert "" not in obj.history.edgesbystartnode
             obj.history.AddEdge(edge)
             changes.add(obj.id)

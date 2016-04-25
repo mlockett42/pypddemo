@@ -126,7 +126,6 @@ firstsaved = False
 firstsavededgeid = ""
 
 def SaveEdges(dc, filenameedges, edges):
-    #print "edges = ",str(edges)
     c = sqlite3.connect(filenameedges)
     # Create table
     for edge in edges:
@@ -150,20 +149,11 @@ def SaveEdges(dc, filenameedges, edges):
             if firstsavededgeid == "":
                 firstsavededgeid = edge.edgeid
             global firstsaved
-            #print "saving edge = ",edge.asDict()
-            #print "firstsaved = ",firstsaved
-            #print "firstsavededgeid = ",firstsavededgeid
-            #print "edge.edgeid = ",edge.edgeid
             assert firstsaved == False or firstsavededgeid == edge.edgeid
-            #if firstsaved:
-            #    continue
             firstsaved = True
         c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
                 "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
                 "'" + propertytypename + "')")
-        #except:
-        #    pass
-
     c.commit()
     c.close()
 
@@ -318,7 +308,6 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
         doc = dc.classes[documentclassnamedict[documentid]](documentid)
         nulledges.extend(history.MergeDanglingBranches())
         history.Replay(doc)
-        #print "documentid = ",documentid, " history.edges = ", history.edges
         dc.AddDocumentObject(doc)
 
     SaveEdges(dc, filenameedges, nulledges)

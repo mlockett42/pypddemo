@@ -8,13 +8,11 @@ class HistoryEdgeNull(HistoryEdge):
         self.propertyname = propertyname
         self.propertyvalue = propertyvalue
         self.propertytype = propertytype
-        print "Null edge created"
 
     def Clone(self):
         return HistoryEdgeNull(self.edgeid, set(self.startnodes), self.endnode, self.propertyownerid, self.propertyname, self.propertyvalue, self.propertytype, self.documentid, self.documentclassname)
 
     def Replay(self, doc):
-        print "Null edge played"
         pass
     
     def GetEdgeDescription(self):
