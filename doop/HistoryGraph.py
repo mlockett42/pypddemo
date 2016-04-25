@@ -128,14 +128,16 @@ class HistoryGraph(object):
         endnodes = self.GetGraphEndNodes()
         if len(endnodes) <= 1:
             print "No dangling end nodes detected"
-            return #There are no dangling end node
+            return list()#There are no dangling end node
         #Create a merge node for the first two dangling end node
         endnodes = list(endnodes)
         print len(endnodes), " dangling end node detect merging the first two"
         nextnode = uuidcompat.getuuid()
         edge = self.edgesbyendnode[endnodes[0]]
         nulledge = HistoryEdgeNull(uuidcompat.getuuid(), endnodes[0:2], nextnode, "", "", "", "", edge.documentid, edge.documentclassname)
+        ret = [nulledge]
         self.AddEdge(nulledge)
-        self.MergeDanglingBranches() #Recur because there may be more than two nodes witing to be merged
+        ret.extend(self.MergeDanglingBranches()) #Recur because there may be more than two nodes witing to be merged
+        return ret #Return a list of all of the nulledges we created so we can save then in a higher level module
 
         

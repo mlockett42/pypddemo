@@ -83,25 +83,29 @@ class DocumentCollection(object):
             else:
                 historygraph = HistoryGraph()
                 historygraphdict[edge.documentid] = historygraph
-            if edge.propertytype == "FieldInt":
+            if edge.__class__.__name__ == "HistoryEdgeNull":
+                edge.propertytype = ""
+                edge.propertyvalue = ""
+            elif edge.propertytype == "FieldInt":
                 propertyvalue = int(edge.propertyvalue)
             elif edge.propertytype == "FieldText":
                 propertytype = basestring
                 propertyvalue = str(edge.propertyvalue)
-            elif edge.propertytype == "" and edgeclassname == "HistoryEdgeNull":
-                edge.propertyvalue = ""
             documentclassnamedict[edge.documentid] = edge.documentclassname
             history = historygraphdict[edge.documentid]
             history.AddEdge(edge)
 
+        nulledges = list()
         for documentid in historygraphdict:
             history = historygraphdict[documentid]
             doc = self.classes[documentclassnamedict[documentid]](documentid)
-            history.MergeDanglingBranches()
+            nulledges.extend(history.MergeDanglingBranches())
             history.Replay(doc)
             self.AddDocumentObject(doc)
 
         self.edgelistener = edgelistener
+
+        return nulledges
        
     def AddEdges(self, edges):
         #A set of edges is received over the internet add them and replay the objects
@@ -124,12 +128,14 @@ class DocumentCollection(object):
             obj.history.AddEdge(edge)
             changes.add(obj.id)
 
+        nulledges = list()
         for documentid in changes:
             doc = self.objectsbyid[documentid]
-            doc.history.MergeDanglingBranches()
+            nulledges.extend(doc.history.MergeDanglingBranches())
             doc.history.Replay(doc)
 
-       
+        return nulledges
+
     def GetByClass(self, theclass):
         return self.documentsbyclass[theclass.__name__]
 

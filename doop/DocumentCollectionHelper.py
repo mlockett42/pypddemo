@@ -313,12 +313,15 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
         history = historygraphdict[documentid]
         history.AddEdge(edge)
 
+    nulledges = list()
     for documentid in historygraphdict:
         doc = dc.classes[documentclassnamedict[documentid]](documentid)
-        history.MergeDanglingBranches()
+        nulledges.extend(history.MergeDanglingBranches())
         history.Replay(doc)
         #print "documentid = ",documentid, " history.edges = ", history.edges
         dc.AddDocumentObject(doc)
+
+    SaveEdges(dc, filenameedges, nulledges)
 
     return sqlite3.connect(filenamedata) #Return the database that can used for get sql objects
 

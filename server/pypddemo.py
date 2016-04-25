@@ -89,7 +89,7 @@ class UploadEdges(Resource):
         edges = [edgeclassdict[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
             edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"], edge["documentclassname"]) for edge in edges]
 
-        DocumentCollection.documentcollection.AddEdges(edges)
+        edges.extend(DocumentCollection.documentcollection.AddEdges(edges))
         DocumentCollectionHelper.SaveEdges(DocumentCollection.documentcollection, 'drawing.history.db', edges)
         return "OK"
 
