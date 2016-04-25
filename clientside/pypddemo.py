@@ -78,7 +78,7 @@ class StaticObjectsTask(Timer):
         StaticObjectsTask(self.callbackfn).schedule(5000) #Poll every five seconds
         
 
-class EdgePoster(object):
+class EdgePoster(Timer):
     def onError(self, text, code):
         Window.alert("Error code = " + str(code) + " text = " + text)
 
@@ -89,10 +89,17 @@ class EdgePoster(object):
         pass
 
     def __init__(self, edges):
-        assert isinstance(edges, list)
-        params = urllib.urlencode({"edges":  JSONEncoder(edges)})
-        #print "posting edges = ",[edge.asDict() for edge in edges]
+        super(EdgePoster,self).__init__()
+        self.edges = edges
+
+    def run(self):
+        assert isinstance(self.edges, list)
+        if len(self.edges) == 0:
+            return #Another schuled task send our edges so do nothin
+        params = urllib.urlencode({"edges":  JSONEncoder(self.edges)})
         HTTPRequest().asyncPost(url = "/UploadEdges", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
+        del self.edges[:] #delete the contents of the edge queue
+
 
 class Point(object):
     def __init__(self, x, y):
@@ -124,12 +131,14 @@ class MainPanel(VerticalPanel):
     CANVAS_HEIGHT = 700
     def __init__(self, owner):
         super(VerticalPanel, self).__init__()
+        self.edgequeue = list()
         self.owner = owner
         self.InitialiseScreen()
         StaticObjectsTask(self.Draw).schedule(5000) #Poll every five seconds
 
     def EdgeListener(self, edge):
-        EdgePoster([edge.asDict()])
+        self.edgequeue.append(edge.asDict())
+        EdgePoster(self.edgequeue).schedule(1) #Schedule in the future so edges are sent in bulk
 
     def InitialiseScreen(self):
         hpanel = HorizontalPanel()
