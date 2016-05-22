@@ -3,8 +3,8 @@ from HistoryEdge import HistoryEdge
 import DocumentCollection
 
 class HistoryEdgeAddChild(HistoryEdge):
-    def __init__(self, edgeid, startnodes, endnode, propertyownerid, propertyname, propertyvalue, propertytype, documentid, documentclassname):
-        super(HistoryEdgeAddChild, self).__init__(edgeid, startnodes, endnode, documentid, documentclassname)
+    def __init__(self, startnodes, propertyownerid, propertyname, propertyvalue, propertytype, documentid, documentclassname):
+        super(HistoryEdgeAddChild, self).__init__(startnodes, documentid, documentclassname)
         assert isinstance(propertyownerid, basestring)
         self.propertyownerid = propertyownerid
         self.propertyvalue = propertyvalue
@@ -21,7 +21,7 @@ class HistoryEdgeAddChild(HistoryEdge):
             getattr(parent, self.propertyname).add(newobj)
 
     def Clone(self):
-        return HistoryEdgeAddChild(self.edgeid, self.startnodes, self.endnode,
+        return HistoryEdgeAddChild(self.startnodes, 
             self.propertyownerid, self.propertyname, self.propertyvalue, self.propertytype, self.documentid, self.documentclassname)
 
     def GetConflictWinner(self, edge2):

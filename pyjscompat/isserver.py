@@ -1,0 +1,3 @@
+def isserver():
+    return False
+

@@ -1,10 +1,9 @@
 #The base class for edges in DOOP
+import md5
 
 class HistoryEdge(object):
-    def __init__(self, edgeid, startnodes, endnode, documentid, documentclassname):
-        self.edgeid = edgeid
+    def __init__(self, startnodes, documentid, documentclassname):
         self.startnodes = startnodes
-        self.endnode = endnode
         self.documentid = documentid
         self.documentclassname = documentclassname
         self.inactive = False
@@ -14,7 +13,7 @@ class HistoryEdge(object):
     def RecordPastEdges(self, pastedges, graph):
         self.pastedges = self.pastedges | set(pastedges)
         edges = graph.edgesbystartnode[self.endnode]
-        pastedges.add(self.edgeid)
+        pastedges.add(self.GetEdgeHash())
         for edge in edges:
             edge.RecordPastEdges(set(pastedges), graph)
 
@@ -22,10 +21,18 @@ class HistoryEdge(object):
     def CanReplay(self, graph):
         for node in self.startnodes:
             if node != "":
+                print "node ",node
                 edge = graph.edgesbyendnode[node]
                 if edge.isplayed == False:
                     return False
         return True
+
+    def IsOrphan(self, graph):
+        for node in self.startnodes:
+            if node != "":
+                if node not in graph.edgesbyendnode:
+                    return True
+        return False
 
     def ResetPastEdges(self):
         self.pastedges = set()
@@ -48,9 +55,7 @@ class HistoryEdge(object):
     
     def asDict(self):
         return {"classname":self.__class__.__name__,
-            "edgeid":self.edgeid,
             "startnodes":list(self.startnodes),
-            "endnode":self.endnode,
             "propertyownerid":self.propertyownerid,
             "propertyvalue":self.propertyvalue,
             "propertyname":self.propertyname,
@@ -61,3 +66,21 @@ class HistoryEdge(object):
 
     def __str__(self):
         return str(self.asDict())
+
+    def GetEndNode(self):
+        if hasattr(self, "endnodeid"):
+            #print "Returning cached end node"
+            return self.endnodeid
+        s = ("classname",self.__class__.__name__,
+            "startnodes",list(self.startnodes),
+            "propertyownerid",self.propertyownerid,
+
+            "propertyvalue",self.propertyvalue,
+            "propertyname",self.propertyname,
+            "propertytype",self.propertytype,
+            "documentid",self.documentid,
+            "documentclassname",self.documentclassname,
+         )
+        self.endnodeid = md5.md5(str(s)).hexdigest()
+        return self.endnodeid
+

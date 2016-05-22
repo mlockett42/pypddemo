@@ -86,7 +86,7 @@ class UploadEdges(Resource):
             edgeclassdict[cls.__name__] = cls
 
         edges = JSONDecoder().decode(request.args["edges"][0])
-        edges = [edgeclassdict[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
+        edges = [edgeclassdict[edge["classname"]](edge["startnodes"], edge["propertyownerid"], 
             edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"], edge["documentclassname"]) for edge in edges]
 
         edges.extend(DocumentCollection.documentcollection.AddEdges(edges))

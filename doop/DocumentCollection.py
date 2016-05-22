@@ -11,6 +11,7 @@ from FieldList import FieldList
 from HistoryGraph import HistoryGraph
 from jsoncompat import JSONEncoder, JSONDecoder
 from FieldInt import FieldInt
+import isserver
 
 class DocumentCollection(object):
     def __init__(self):
@@ -38,8 +39,8 @@ class DocumentCollection(object):
         for (objid, document) in self.objectsbyid.iteritems():
             if document.IsDocument():
                 history = document.history
-                for edgeid in history.edges:
-                    edge = history.edges[edgeid]
+                for endnodeid in history.edgesbyendnode:
+                    edge = history.edgesbyendnode[endnodeid]
                     startnodes = list(edge.startnodes)
                     if len(edge.startnodes) == 1:
                         startnode1id = startnodes[0]
@@ -50,19 +51,18 @@ class DocumentCollection(object):
                     else:
                         assert False
                     
-                    if notinfn(edge.edgeid):
+                    if notinfn(edge.GetEndNode()):
                         ret.append(edge.asDict())
         return JSONEncoder().encode(ret)
 
-    def GetAllEdgeIDs(self):
-        #Return a list of all of the edgeid in this document collection
+    def GetAllEndNodes(self):
+        #Return a list of all of the endnodes in this document collection
         l = list()
         for (objid, document) in self.objectsbyid.iteritems():
             if document.IsDocument():
                 history = document.history
-                for edgeid in history.edges:
-                    edge = history.edges[edgeid]
-                    l.append(edge.edgeid)
+                for endnodeid in history.edgesbyendnode:
+                    l.append(endnodeid)
         return l        
 
     def LoadFromJSON(self, edges):
@@ -72,7 +72,7 @@ class DocumentCollection(object):
         documentclassnamedict = dict()
 
         for edge in edges:
-            edge = self.historyedgeclasses[edge["classname"]](edge["edgeid"], edge["startnodes"], edge["endnode"], edge["propertyownerid"], 
+            edge = self.historyedgeclasses[edge["classname"]](edge["startnodes"], edge["propertyownerid"], 
                 edge["propertyname"], edge["propertyvalue"], edge["propertytype"], edge["documentid"], edge["documentclassname"])
 
             if edge.documentid in historygraphdict:
@@ -99,7 +99,11 @@ class DocumentCollection(object):
         for documentid in historygraphdict:
             history = historygraphdict[documentid]
             doc = self.classes[documentclassnamedict[documentid]](documentid)
-            nulledges.extend(history.MergeDanglingBranches())
+            if not isserver.isserver():
+                print "LoadFromJSON Merging dangling edges"
+                #Only merge dangling edges when we are running on the client
+                nulledges.extend(history.MergeDanglingBranches())
+            print "LoadFromJSON Replaying history"
             history.Replay(doc)
             self.AddDocumentObject(doc)
 

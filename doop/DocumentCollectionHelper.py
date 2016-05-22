@@ -18,10 +18,9 @@ def SaveDocumentCollection(dc, filenameedges, filenamedata):
                     documentid text, 
                     documentclassname text, 
                     edgeclassname text, 
-                    edgeid text PRIMARY KEY, 
                     startnode1id text, 
                     startnode2id text, 
-                    endnodeid text, 
+                    endnodeid text PRIMARY KEY, 
                     propertyownerid text, 
                     propertyname text, 
                     propertyvalue text, 
@@ -32,7 +31,7 @@ def SaveDocumentCollection(dc, filenameedges, filenamedata):
         documentlist = dc.objects[documentid]
         for document in documentlist:
             history = document.history
-            edge = history.edges[edgeid]
+            edge = history.edgesbyendnode[endnodeid]
             startnodes = list(edge.startnodes)
             if len(edge.startnodes) == 1:
                 startnode1id = startnodes[0]
@@ -47,8 +46,8 @@ def SaveDocumentCollection(dc, filenameedges, filenamedata):
                 propertytypename = ""
             else:
                 propertytypename = edge.propertytype.__name__
-            c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
-                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
+            c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "',  " +
+                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.GetEndNode() + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
                 "'" + propertytypename + "')")
 
     c.commit()
@@ -122,9 +121,6 @@ def SaveDocumentObject(self, documentobject, parentobject, foreignkeydict, colum
     sql += ")"
     self.database.execute(sql)
 
-firstsaved = False
-firstsavededgeid = ""
-
 def SaveEdges(dc, filenameedges, edges):
     c = sqlite3.connect(filenameedges)
     # Create table
@@ -145,14 +141,9 @@ def SaveEdges(dc, filenameedges, edges):
             propertytypename = edge.propertytype
         #try:
         if startnode1id == "":
-            global firstsavededgeid
-            if firstsavededgeid == "":
-                firstsavededgeid = edge.edgeid
-            global firstsaved
-            assert firstsaved == False or firstsavededgeid == edge.edgeid
             firstsaved = True
-        c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
-                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
+        c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', " +
+                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.GetEndNode() + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
                 "'" + propertytypename + "')")
     c.commit()
     c.close()
@@ -251,17 +242,16 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
                     documentid text, 
                     documentclassname text, 
                     edgeclassname text, 
-                    edgeid text PRIMARY KEY, 
                     startnode1id text, 
                     startnode2id text, 
-                    endnodeid text, 
+                    endnodeid text PRIMARY KEY, 
                     propertyownerid text, 
                     propertyname text, 
                     propertyvalue text, 
                     propertytype text
                 )''')
     c.commit()
-    cur.execute("SELECT documentid, documentclassname, edgeclassname, edgeid, startnode1id, startnode2id, endnodeid, propertyownerid, propertyname, propertyvalue, propertytype FROM edge")
+    cur.execute("SELECT documentid, documentclassname, edgeclassname, startnode1id, startnode2id, endnodeid, propertyownerid, propertyname, propertyvalue, propertytype FROM edge")
 
     historygraphdict = defaultdict(HistoryGraph)
     documentclassnamedict = dict()
@@ -271,14 +261,13 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
         documentid = row[0]
         documentclassname = row[1]
         edgeclassname = row[2]
-        edgeid = row[3]
-        startnode1id = row[4]
-        startnode2id = row[5]
-        endnodeid = row[6]
-        propertyownerid = row[7]
-        propertyname = row[8]
-        propertyvaluestr = row[9]
-        propertytypestr = row[10]
+        startnode1id = row[3]
+        startnode2id = row[4]
+        #endnodeid = row[5]
+        propertyownerid = row[6]
+        propertyname = row[7]
+        propertyvaluestr = row[8]
+        propertytypestr = row[9]
 
         if documentid in historygraphdict:
             historygraph = historygraphdict[documentid]
@@ -299,7 +288,7 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
             startnodes = {startnode1id}
         else:
             startnodes = {startnode1id, startnode2id}
-        edge = dc.historyedgeclasses[edgeclassname](edgeid, startnodes, endnodeid, propertyownerid, propertyname, propertyvalue, propertytypestr, documentid, documentclassname)
+        edge = dc.historyedgeclasses[edgeclassname](startnodes, propertyownerid, propertyname, propertyvalue, propertytypestr, documentid, documentclassname)
         history = historygraphdict[documentid]
         history.AddEdge(edge)
 
@@ -308,6 +297,7 @@ def LoadDocumentCollection(dc, filenameedges, filenamedata):
         doc = dc.classes[documentclassnamedict[documentid]](documentid)
         nulledges.extend(history.MergeDanglingBranches())
         history.Replay(doc)
+        print "Replaying documentid = ",documentid
         dc.AddDocumentObject(doc)
 
     SaveEdges(dc, filenameedges, nulledges)

@@ -42,18 +42,19 @@ class Document(DocumentObject):
         self.WasChanged(ChangeType.ADD_CHILD, "", "", self.id, self.__class__.__name__)
         
     def WasChanged(self, changetype, propertyownerid, propertyname, propertyvalue, propertytype):
-        nextnode  = uuidcompat.getuuid()
         nodeset = set()
+        #print "WasChanged currentnode start ", self.currentnode
         nodeset.add(self.currentnode)
         if changetype == ChangeType.SET_PROPERTY_VALUE:
-            edge = HistoryEdgeSimpleProperty(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
+            edge = HistoryEdgeSimpleProperty(nodeset, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
         elif changetype == ChangeType.ADD_CHILD:
-            edge = HistoryEdgeAddChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
+            edge = HistoryEdgeAddChild(nodeset, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
         elif changetype == ChangeType.REMOVE_CHILD:
-            edge = HistoryEdgeRemoveChild(uuidcompat.getuuid(), nodeset, nextnode, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
+            edge = HistoryEdgeRemoveChild(nodeset, propertyownerid, propertyname, propertyvalue, propertytype, self.id, self.__class__.__name__)
         else:
             assert False
-        self.currentnode = nextnode
+        self.currentnode = edge.GetEndNode()
+        #print "WasChanged currentnode end ", self.currentnode
         self.history.AddEdge(edge)
 
     def GetDocumentObject(self, id):

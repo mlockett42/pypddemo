@@ -34,7 +34,11 @@ class PYPDDemo:
 
     def onCompletion(self, text):
         edges = JSONDecoder(text)
-        DocumentCollection.documentcollection.LoadFromJSON(edges)
+        nulledges = DocumentCollection.documentcollection.LoadFromJSON(edges)
+
+        #If we created any nulledges for merge send them back to the server
+        edgequeue = [edge.asDict() for edge in nulledges]
+        EdgePoster(edgequeue).schedule(1) #Schedule in the future so edges are sent in bulk
 
         self.mainpanel = MainPanel(self)
         RootPanel().add(self.mainpanel)
@@ -56,7 +60,7 @@ class StaticObjectsTask(Timer):
         self.callbackfn = callbackfn
 
     def run(self):
-        edgeids = JSONEncoder(DocumentCollection.documentcollection.GetAllEdgeIDs())
+        edgeids = JSONEncoder(DocumentCollection.documentcollection.GetAllEndNodes())
         params = urllib.urlencode({"edgeids": edgeids })
         HTTPRequest().asyncPost(url = "/StaticObjects", handler=self,returnxml=False, postData = params, content_type = "application/x-www-form-urlencoded")
 
@@ -70,7 +74,12 @@ class StaticObjectsTask(Timer):
 
     def onCompletion(self, text):
         edges = JSONDecoder(text)
-        DocumentCollection.documentcollection.LoadFromJSON(edges)
+        nulledges = DocumentCollection.documentcollection.LoadFromJSON(edges)
+
+        #If we created any nulledges for merge send them back to the server
+        edgequeue = [edge.asDict() for edge in nulledges]
+        EdgePoster(edgequeue).schedule(1) #Schedule in the future so edges are sent in bulk
+
         self.ScheduleTask()
         self.callbackfn()
 
