@@ -47,9 +47,12 @@ def SaveDocumentCollection(dc, filenameedges, filenamedata):
                 propertytypename = ""
             else:
                 propertytypename = edge.propertytype.__name__
-            c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
-                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
-                "'" + propertytypename + "')")
+            c.execute("INSERT INTO edge VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (document.id, document.__class__.__name__, 
+                edge.__class__.__name__, edge.edgeid, startnode1id, startnode2id, edge.endnode, edge.propertyownerid, edge.propertyname,
+                edge.propertyvalue, propertytypename))
+            #c.execute("INSERT INTO edge VALUES ('" + document.id + "', '" + document.__class__.__name__ + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
+            #    "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
+            #    "'" + propertytypename + "')")
 
     c.commit()
     c.close()
@@ -105,22 +108,17 @@ def SaveDocumentObject(self, documentobject, parentobject, foreignkeydict, colum
             (foreignkeyclassname, a) = foreignkeydict[documentobject.__class__.__name__][0]
         else:
             assert False #Only one foreign key allowed
-    sql = "INSERT INTO " + documentobject.__class__.__name__ + " VALUES ('" + documentobject.id + "'"
+    sql = "INSERT INTO " + documentobject.__class__.__name__ + " VALUES (?"
+    values = list()
     for (columnname, columntype) in columndict[documentobject.__class__.__name__]:
-        if columntype == "int":
-            quote = ""
-        elif columntype == "text":
-            quote = "'"
-        else:
-            assert False
-            quote = ""
-        sql += ","
+        sql += ",?"
+        
         if foreignkeyclassname != "" and foreignkeyclassname + "id" == columnname:
-            sql += quote + parentobject.id + quote
+            values.append(parentobject.id)
         else:
-            sql += quote + str(getattr(documentobject, columnname)) + quote
+            values.append(getattr(documentobject, columnname))
     sql += ")"
-    self.database.execute(sql)
+    self.database.execute(sql, tuple(values))
 
 firstsaved = False
 firstsavededgeid = ""
@@ -151,9 +149,12 @@ def SaveEdges(dc, filenameedges, edges):
             global firstsaved
             assert firstsaved == False or firstsavededgeid == edge.edgeid
             firstsaved = True
-        c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
-                "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
-                "'" + propertytypename + "')")
+        c.execute("INSERT INTO edge VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (edge.documentid , edge.documentclassname, 
+            edge.__class__.__name__, edge.edgeid, startnode1id, startnode2id, edge.endnode, edge.propertyownerid, edge.propertyname,
+            edge.propertyvalue, propertytypename))
+        #c.execute("INSERT OR IGNORE INTO edge VALUES ('" + edge.documentid + "', '" + edge.documentclassname + "', '" + edge.__class__.__name__ + "', '" + edge.edgeid + "', " +
+        #        "'" + startnode1id + "', '" + startnode2id + "', '" + edge.endnode + "', '" + edge.propertyownerid + "', '" + edge.propertyname + "', '" + str(edge.propertyvalue) + "', "
+        #        "'" + propertytypename + "')")
     c.commit()
     c.close()
 
@@ -209,21 +210,17 @@ def SaveDocumentObject(database, documentobject, parentobject, foreignkeydict, c
         else:
             assert False #Only one foreign key allowed
     sql = "INSERT INTO " + documentobject.__class__.__name__ + " VALUES ('" + documentobject.id + "'"
+    sql = "INSERT INTO " + documentobject.__class__.__name__ + " VALUES (?"
+    values = list()
     for (columnname, columntype) in columndict[documentobject.__class__.__name__]:
-        if columntype == "int":
-            quote = ""
-        elif columntype == "text":
-            quote = "'"
-        else:
-            assert False
-            quote = ""
-        sql += ","
+        sql += ",?"
+        
         if foreignkeyclassname != "" and foreignkeyclassname + "id" == columnname:
-            sql += quote + parentobject.id + quote
+            values.append(parentobject.id)
         else:
-            sql += quote + str(getattr(documentobject, columnname)) + quote
+            values.append(getattr(documentobject, columnname))
     sql += ")"
-    database.execute(sql)
+    self.database.execute(sql, tuple(values))
     
 def GetSQLObjects(self, query):
     ret = list()
